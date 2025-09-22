@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0-android</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\echat\Logging_ClientFriendly\Logging_ClientFriendly.csproj" />
+    <ProjectReference Include="..\..\Native\CSharp\Native.csproj" />
+  </ItemGroup>
+</Project>

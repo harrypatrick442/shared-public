@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\echat\Authentication\Authentication.csproj" />
+    <ProjectReference Include="..\Core\CSharp\Core.csproj" />
+    <ProjectReference Include="..\Emailing\Emailing.csproj" />
+    <ProjectReference Include="..\..\echat\Sessions\Sessions.csproj" />
+    <ProjectReference Include="..\..\echat\UserRouting\UserRouting.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Client\" />
+    <Folder Include="Messages\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.3.0" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="2.2.8" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.5" />
+    <PackageReference Include="UAParser" Version="3.1.47" />
+  </ItemGroup>
+</Project>

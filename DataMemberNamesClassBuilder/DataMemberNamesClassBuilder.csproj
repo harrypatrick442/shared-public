@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Bluetooth\CSharp\Bluetooth.csproj" />
+    <ProjectReference Include="..\..\hvps\Code\C#\HVPSMessages\HVPSMessages.csproj" />
+    <ProjectReference Include="..\..\CircuitAnalysis\HVPSUIAPI\HVPSUIAPI.csproj" />
+    <ProjectReference Include="..\..\CircuitAnalysis\VoltageFeedbackModuleMessages\VoltageFeedbackModuleMessages.csproj" />
+    <ProjectReference Include="..\..\echat\Administration\Administration.csproj" />
+    <ProjectReference Include="..\..\echat\Authentication\Authentication.csproj" />
+    <ProjectReference Include="..\BaseMessages\CSharp\BaseMessages.csproj" />
+    <ProjectReference Include="..\..\echat\ChatCore\ChatCore.csproj" />
+    <ProjectReference Include="..\..\echat\Chat\Chat.csproj" />
+    <ProjectReference Include="..\..\echat\EChatGeneric\EChatGeneric.csproj" />
+    <ProjectReference Include="..\..\echat\Emoticons\Emoticons.csproj" />
+    <ProjectReference Include="..\..\filesrelay\FilesRelayBase\FilesRelayBase.csproj" />
+    <ProjectReference Include="..\..\filesrelay\FilesRelayCoreNativeAndWebAPI\FilesRelayCoreNativeAndWebAPI.csproj" />
+    <ProjectReference Include="..\..\filesrelay\FilesRelayCore\FilesRelayCore.csproj" />
+    <ProjectReference Include="..\Fundamental\CSharp\Fundamental.csproj" />
+    <ProjectReference Include="..\..\echat\HashTags\HashTags.csproj" />
+    <ProjectReference Include="..\..\echat\LocationCore\LocationCore.csproj" />
+    <ProjectReference Include="..\..\echat\LocationDatabase\Location.csproj" />
+    <ProjectReference Include="..\..\echat\MentionsCore\MentionsCore.csproj" />
+    <ProjectReference Include="..\..\shared-private\MessageTypes\MessageTypes.csproj" />
+    <ProjectReference Include="..\..\echat\MultimediaCore\MultimediaCore.csproj" />
+    <ProjectReference Include="..\..\echat\MultimediaServerCore\MultimediaServerCore.csproj" />
+    <ProjectReference Include="..\Native\CSharp\Native.csproj" />
+    <ProjectReference Include="..\..\echat\RoomMultimediaCore\RoomMultimediaCore.csproj" />
+    <ProjectReference Include="..\..\echat\Sessions\Sessions.csproj" />
+    <ProjectReference Include="..\..\echat\UserIgnore\UserIgnore.csproj" />
+    <ProjectReference Include="..\..\echat\UserLocation\UserLocation.csproj" />
+    <ProjectReference Include="..\..\echat\UserMultimediaCore\UserMultimediaCore.csproj" />
+    <ProjectReference Include="..\..\echat\UserRoutedMessages\UserRoutedMessages.csproj" />
+    <ProjectReference Include="..\..\echat\UserRouting\UserRouting.csproj" />
+    <ProjectReference Include="..\..\echat\Users\Users.csproj" />
+    <ProjectReference Include="..\WebAbstract\WebAbstract.csproj" />
+  </ItemGroup>
+</Project>

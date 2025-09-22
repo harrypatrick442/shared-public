@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\BasicEvents\CSharp\BasicEvents.csproj" />
+    <ProjectReference Include="..\..\CoreNativeAndBackend\CoreNativeAndBackend.csproj" />
+    <ProjectReference Include="..\DataMemberNames\DataMemberNames.csproj" />
+    <ProjectReference Include="..\..\EnvironmentEnums\EnvironmentEnums.csproj" />
+    <ProjectReference Include="..\..\Fundamental\CSharp\Fundamental.csproj" />
+    <ProjectReference Include="..\..\JSON\CSharp\JSON.csproj" />
+    <ProjectReference Include="..\..\Ticketing\CSharp\Ticketing.csproj" />
+    <ProjectReference Include="..\..\VirtualSockets\CSharp\VirtualSockets.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="NewFolder\" />
+  </ItemGroup>
+</Project>
