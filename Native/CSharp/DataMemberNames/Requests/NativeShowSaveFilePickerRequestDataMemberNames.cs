@@ -3,7 +3,7 @@ using CoreNativeAndBackend.DataMemberNames.Messages;
 
 namespace Native.DataMemberNames.Requests
 {
-    [MessageType(global::MessageTypes.MessageTypes.NativeShowSaveFilePicker)]
+    [MessageType(MessageTypes.NativeShowSaveFilePicker)]
     public static class NativeShowSaveFilePickerRequestDataMemberNames
     {
         [DataMemberNamesClass(typeof(FileInfoDataMemberNames), isArray: false)]

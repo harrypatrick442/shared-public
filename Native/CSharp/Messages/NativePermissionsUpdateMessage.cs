@@ -2,7 +2,7 @@ using Core.Messages.Messages;
 using Native.DataMemberNames.Messages;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
-namespace FilesRelayNative.Messages
+namespace Native.Messages
 {
     [DataContract]
 	public class NativePermissionsUpdateMessage : TypedMessageBase
@@ -15,7 +15,7 @@ namespace FilesRelayNative.Messages
             bool hasAllRequired)
         {
             HasAllRequired = hasAllRequired;
-            _Type = MessageTypes.MessageTypes.NativePermissionsUpdate;
+            _Type = MessageTypes.NativePermissionsUpdate;
         }
         protected NativePermissionsUpdateMessage() { 
             

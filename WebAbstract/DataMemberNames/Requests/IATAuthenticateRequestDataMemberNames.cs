@@ -2,7 +2,7 @@
 
 namespace WebAbstract.DataMemberNames.Requests
 {
-    [MessageType(global::MessageTypes.MessageTypes.IATAuthentication)]
+    [MessageType(MessageTypes.IATAuthentication)]
     public static class IATAuthenticateRequestDataMemberNames
     {
         public const string NodeId = "n";

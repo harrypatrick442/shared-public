@@ -1,7 +1,4 @@
-﻿using Core.Maths.Tensors;
-using System.Drawing;
-
-namespace CircuitAnalysis.ComponentSpecs
+﻿namespace CircuitAnalysis.ComponentSpecs
 {
     public abstract class ZenerDiodeSpecs : SpecsBase
     {

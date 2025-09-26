@@ -1,5 +1,6 @@
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
+using Core.DataMemberNames;
 using Core.DataMemberNames.Requests;
 
 namespace Core.Messages.Messages
@@ -7,11 +8,11 @@ namespace Core.Messages.Messages
     [DataContract]
     public class ErrorMessage
     {
-        [JsonPropertyName(global::MessageTypes.MessageTypes.Type)]
+        [JsonPropertyName(MessageTypeDataMemberName.Value)]
         [JsonInclude]
-        [DataMember(Name = global::MessageTypes.MessageTypes.Type)]
+        [DataMember(Name = MessageTypeDataMemberName.Value)]
 
-        public string Type { get { return global::MessageTypes.MessageTypes.ErrorMessage; } protected set { } }
+        public string Type { get { return MessageTypes.ErrorMessage; } protected set { } }
         private string _Message;
         [JsonPropertyName(ErrorMessageDataMemberNames.Message)]
         [JsonInclude]

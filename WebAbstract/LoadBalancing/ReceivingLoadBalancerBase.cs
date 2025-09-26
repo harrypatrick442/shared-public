@@ -2,7 +2,7 @@
 using Core.Maths;
 using Timer = System.Timers.Timer;
 
-namespace Core.LoadBalancing
+namespace WebAbstract.LoadBalancing
 {
     public abstract class ReceivingLoadBalancerBase:INodeIdAndLoadFactorHandler
     {

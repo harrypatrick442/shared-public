@@ -2,14 +2,12 @@
 using Core.Handlers;
 using Logging;
 using InterserverComs;
-using MessageTypes.Internal;
 using Core;
-using Core.Machine;
-using WebAPI.Requests;
 using WebAPI.Responses;
 using Core.LoadBalancing;
-
-namespace FilesRelayCore.TransferServers
+using WebAbstract.LoadBalancing;
+using WebAbstract.Requests;
+namespace WebAbstract.MachineMetricsMesh
 {
     public partial class MachineMetricsMesh
     {
@@ -31,7 +29,7 @@ namespace FilesRelayCore.TransferServers
             GetMachineMetricsResponse response;
             try
             {
-                MachineMetrics machineMetrics = GetMachineMetrics_Here();
+                Core.Machine.MachineMetrics machineMetrics = GetMachineMetrics_Here();
                 response = GetMachineMetricsResponse.Successful(machineMetrics, request.Ticket);
             }
             catch (Exception ex)

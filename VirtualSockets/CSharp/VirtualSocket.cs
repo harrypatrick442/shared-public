@@ -1,7 +1,7 @@
 ﻿using Logging;
 using JSON;
 
-namespace Core.VirtualSockets
+namespace VirtualSockets
 {
     public abstract class VirtualSocket:IDisposable
     {
@@ -35,7 +35,7 @@ namespace Core.VirtualSockets
             catch (Exception ex) {
                 Logs.Default.Error(ex);
             }
-            if (message.InternalType== global::MessageTypes.MessageTypes.VirtualSocketDisposing) {
+            if (message.InternalType== MessageTypes.VirtualSocketDisposing) {
                 Dispose();
             }
         }
@@ -66,7 +66,7 @@ namespace Core.VirtualSockets
             }
             try
             {
-                _Send(new VirtualSocketMessage(_Id, null, global::MessageTypes.MessageTypes.VirtualSocketDisposing));
+                _Send(new VirtualSocketMessage(_Id, null, MessageTypes.VirtualSocketDisposing));
             }
             catch (Exception ex)
             {

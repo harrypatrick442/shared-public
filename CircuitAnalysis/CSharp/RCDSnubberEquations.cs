@@ -1,5 +1,4 @@
-﻿using CircuitAnalysis.ComponentSpecs;
-using Core.Enums;
+﻿using Core.Enums;
 
 namespace CircuitAnalysis
 {

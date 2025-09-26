@@ -4,7 +4,7 @@ using System.Net.NetworkInformation;
 
 namespace Native.DataMemberNames.Requests
 {
-    [MessageType(global::MessageTypes.MessageTypes.NativeStorageDeleteAll)]
+    [MessageType(MessageTypes.NativeStorageDeleteAll)]
     public static class NativeStorageDeleteAllRequestDataMemberNames
     {
     }

@@ -1,8 +1,9 @@
 ﻿using Logging;
 using Core.Exceptions;
 using InterserverComs;
+using WebAbstract.LoadBalancing;
 
-namespace Core.LoadBalancing
+namespace WebAbstract.LoadBalancing
 {
     public class ReceivingLoadBalancer
     {

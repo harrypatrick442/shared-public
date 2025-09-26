@@ -8,7 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\BasicEvents\CSharp\BasicEvents.csproj" />
     <ProjectReference Include="..\..\CoreNativeAndBackend\CoreNativeAndBackend.csproj" />
-    <ProjectReference Include="..\DataMemberNames\DataMemberNames.csproj" />
+    <ProjectReference Include="..\..\..\snippets\API\DataMemberNames\DataMemberNames.csproj" />
     <ProjectReference Include="..\..\EnvironmentEnums\EnvironmentEnums.csproj" />
     <ProjectReference Include="..\..\Fundamental\CSharp\Fundamental.csproj" />
     <ProjectReference Include="..\..\JSON\CSharp\JSON.csproj" />

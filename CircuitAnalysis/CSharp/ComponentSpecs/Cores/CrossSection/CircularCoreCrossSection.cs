@@ -1,7 +1,4 @@
-﻿using Core.Maths.Tensors;
-using System.Drawing;
-
-namespace CircuitAnalysis.ComponentSpecs.Cores.CrossSection
+﻿namespace CircuitAnalysis.ComponentSpecs.Cores.CrossSection
 {
     public class CircularCoreCrossSection : CoreCrossSection
     {

@@ -7,7 +7,7 @@ namespace Native.Requests
     [DataContract]
     public class NativeStorageDeleteAllRequest:TicketedMessageBase
     {
-        public NativeStorageDeleteAllRequest() : base(global::MessageTypes.MessageTypes.NativeStorageDeleteAll)
+        public NativeStorageDeleteAllRequest() : base(MessageTypes.NativeStorageDeleteAll)
         {
 
         }

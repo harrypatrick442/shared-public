@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using Core.Messages.Messages;
 using VirtualSockets.DataMemberNames;
 
-namespace Core.VirtualSockets
+namespace VirtualSockets
 {
     [DataContract]
     public class VirtualSocketMessage:TypedMessageBase
@@ -27,7 +27,7 @@ namespace Core.VirtualSockets
             _Id = id;
             _Payload = payload;
             _InternalType = type;
-            _Type = global::MessageTypes.MessageTypes.VirtualSocketMessage;
+            _Type = MessageTypes.VirtualSocketMessage;
         }
         protected VirtualSocketMessage() { }
     }

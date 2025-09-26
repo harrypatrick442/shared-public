@@ -1,4 +1,4 @@
-﻿namespace Core.LoadBalancing
+﻿namespace WebAbstract.LoadBalancing
 {
     public enum LoadFactorType
     {

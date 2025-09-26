@@ -13,9 +13,11 @@ using Core.Interfaces;
 using Sessions;
 using Authentication.Messages;
 using Authentication.Enums;
+using Authentication;
 using WebAbstract;
+using Core;
 
-namespace Core.Authentication
+namespace WebAbstract.ClientEndpoints
 {
     public class AuthenticatedClientEndpoint
     {
@@ -47,13 +49,14 @@ namespace Core.Authentication
             _GetUserAgent = getUserAgent;
             _DebugLoggingEnabled = debugLoggingEnabled;
             _GetAdditionalPayloadForAuthenticatedUser = getAdditionalPayloadForAuthenticatedUser;
-            clientMessageTypeMappingsHandler.AddRange(new TupleList<string, DelegateHandleMessageOfType<TypeTicketedAndWholePayload>> {
-                { global::MessageTypes.MessageTypes.AuthenticationLogIn, LogIn },
-                { global::MessageTypes.MessageTypes.AuthenticationLogOut, LogOut },
-                { global::MessageTypes.MessageTypes.AuthenticationRegister, Register},
-                { global::MessageTypes.MessageTypes.AuthenticationLogInGuest, LogInGuest },
-                { global::MessageTypes.MessageTypes.AuthenticateWithToken, AuthenticateWithToken },
-                { global::MessageTypes.MessageTypes.AuthenticationResetPasswordByEmail, ResetPasswordByEmail }
+            clientMessageTypeMappingsHandler.AddRange(
+                new TupleList<string, DelegateHandleMessageOfType<TypeTicketedAndWholePayload>> {
+                { Authentication.MessageTypes.AuthenticationLogIn, LogIn },
+                { Authentication.MessageTypes.AuthenticationLogOut, LogOut },
+                { Authentication.MessageTypes.AuthenticationRegister, Register},
+                { Authentication.MessageTypes.AuthenticationLogInGuest, LogInGuest },
+                {   Authentication.MessageTypes.AuthenticateWithToken, AuthenticateWithToken },
+                { Authentication.MessageTypes.AuthenticationResetPasswordByEmail, ResetPasswordByEmail }
             });
         }
         protected void Initialize(IClientEndpoint endpoint)

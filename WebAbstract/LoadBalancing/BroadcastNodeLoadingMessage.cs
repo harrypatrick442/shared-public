@@ -1,10 +1,11 @@
+using Core.LoadBalancing;
 using Core.Messages.Messages;
 using MessageTypes.Internal;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 using WebAbstract.DataMemberNames.Interserver.Messages;
 
-namespace Core.LoadBalancing
+namespace WebAbstract.LoadBalancing
 {
     [DataContract]
     public class BroadcastNodeLoadingMessage:TypedMessageBase

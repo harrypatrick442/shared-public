@@ -15,7 +15,7 @@ namespace Native.Messages
         public NativePlatformMessage(Platform platform)
         {
             Platform = platform;
-            _Type = global::MessageTypes.MessageTypes.NativePlatform;
+            _Type = MessageTypes.NativePlatform;
         }
         protected NativePlatformMessage() { 
             

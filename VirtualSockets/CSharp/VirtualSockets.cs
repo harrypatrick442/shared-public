@@ -4,7 +4,7 @@ using JSON;
 using Logging;
 using Core.Messages;
 using System.Linq;
-namespace Core.VirtualSockets
+namespace VirtualSockets
 {
     public class VirtualSockets
     {

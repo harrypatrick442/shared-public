@@ -4,7 +4,7 @@ using System.Net.NetworkInformation;
 
 namespace Native.DataMemberNames.Messages
 {
-    [MessageType(global::MessageTypes.MessageTypes.NativeGotNewToken)]
+    [MessageType(MessageTypes.NativeGotNewToken)]
     public static class NativeGotNewTokenMessageDataMemberNames
     {
         public const string Token = "t";

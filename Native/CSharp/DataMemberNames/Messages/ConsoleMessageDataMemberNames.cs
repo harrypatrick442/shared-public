@@ -2,7 +2,7 @@ using MessageTypes.Attributes;
 
 namespace Native.DataMemberNames.Messages
 {
-    [MessageType(MessageTypes.MessageTypes.ConsoleMessage)]
+    [MessageType(MessageTypes.ConsoleMessage)]
     public static class ConsoleMessageDataMemberNames
     {
         public const string Message = "m";

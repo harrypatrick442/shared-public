@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
 using Core.Enums;
 
 namespace CircuitAnalysis.ComponentSpecs

@@ -1,4 +1,4 @@
-﻿namespace Core.VirtualSockets
+﻿namespace VirtualSockets
 {
     public static class VirtualSocketIdentifierSource
     {

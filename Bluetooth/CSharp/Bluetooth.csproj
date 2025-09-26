@@ -30,6 +30,7 @@
     <PackageReference Include="Warble.Net" Version="1.1.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\shared-private\MessageTypes\MessageTypes.csproj" />
     <ProjectReference Include="..\..\BaseMessages\CSharp\BaseMessages.csproj" />
     <ProjectReference Include="..\..\Core\CSharp\Core.csproj" />
     <ProjectReference Include="..\..\Native\CSharp\Native.csproj" />

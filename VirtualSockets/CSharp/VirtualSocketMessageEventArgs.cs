@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Core.VirtualSockets
+namespace VirtualSockets
 {
     public class VirtualSocketMessageEventArgs : EventArgs
     {

@@ -4,7 +4,7 @@ using System.Net.NetworkInformation;
 
 namespace Native.DataMemberNames.Messages
 {
-    [MessageType(global::MessageTypes.MessageTypes.NativePlatform)]
+    [MessageType(MessageTypes.NativePlatform)]
     public static class NativePlatformMessageDataMemberNames
     {
         public const string Platform = "p";

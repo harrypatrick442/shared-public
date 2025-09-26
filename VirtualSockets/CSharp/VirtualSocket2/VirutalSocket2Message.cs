@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using Core.Messages.Messages;
 using VirtualSockets.DataMemberNames;
 
-namespace Core.VirtualSockets
+namespace VirtualSockets
 {
     [DataContract]
     public class VirtualSocket2Message:TypedMessageBase
@@ -25,7 +25,7 @@ namespace Core.VirtualSockets
         [DataMember(Name= VirtualSocketMessageDataMemberNames.Payload)]
         public string Payload { get; protected set; }
         public void SetTypeToVirtualSocket2MessageAndDropEndpointIdAndTheirNodeId() {
-            Type = global::MessageTypes.MessageTypes.VirtualSocket2Message;
+            Type = MessageTypes.VirtualSocket2Message;
             EndpointId = null;
             TheirNodeId = null;
         }

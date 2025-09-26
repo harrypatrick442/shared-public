@@ -12,11 +12,11 @@ namespace Native.Requests
         [JsonInclude]
         [DataMember(Name = NativeStorageGetStringRequestDataMemberNames.Key)]
         public string Key { get; protected set; }
-        public NativeStorageGetStringRequest(string key) : base(global::MessageTypes.MessageTypes.NativeStorageGetString)
+        public NativeStorageGetStringRequest(string key) : base(MessageTypes.NativeStorageGetString)
         {
             Key = key;
         }
-        protected NativeStorageGetStringRequest():base(global::MessageTypes.MessageTypes.NativeStorageGetString) { 
+        protected NativeStorageGetStringRequest():base(MessageTypes.NativeStorageGetString) { 
             
         }
     }

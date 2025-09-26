@@ -4,7 +4,7 @@ using System.Net.NetworkInformation;
 
 namespace Native.DataMemberNames.Requests
 {
-    [MessageType(global::MessageTypes.MessageTypes.NativeStorageGetString)]
+    [MessageType(MessageTypes.NativeStorageGetString)]
     public static class NativeStorageGetStringRequestDataMemberNames
     {
         public const string Key = "k";

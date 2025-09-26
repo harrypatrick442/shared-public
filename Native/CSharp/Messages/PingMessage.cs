@@ -7,7 +7,7 @@ namespace Native.Messages
     {
         public PingMessage()
         {
-            _Type = MessageTypes.MessageTypes.Ping;
+            _Type = MessageTypes.Ping;
         }
     }
 }

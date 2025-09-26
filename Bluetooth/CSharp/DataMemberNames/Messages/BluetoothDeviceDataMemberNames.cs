@@ -1,8 +1,4 @@
-﻿using MessageTypes.Attributes;
-using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
-
-namespace Bluetooth.DataMemberNames.Messages
+﻿namespace Bluetooth.DataMemberNames.Messages
 {
     public static class BluetoothDeviceDataMemberNames
     {

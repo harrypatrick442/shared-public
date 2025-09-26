@@ -4,7 +4,7 @@ using System.Net.NetworkInformation;
 
 namespace Native.DataMemberNames.Requests
 {
-    [MessageType(global::MessageTypes.MessageTypes.NativePickFile)]
+    [MessageType(MessageTypes.NativePickFile)]
     public static class NativePickFileRequestDataMemberNames
     {
 

@@ -1,9 +1,7 @@
 using Core.Messages.Messages;
-using MessageTypes.Internal;
 using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
 
-namespace WebAPI.Requests
+namespace WebAbstract.Requests
 {
     [DataContract]
     public class GetMachineMetricsRequest : TicketedMessageBase

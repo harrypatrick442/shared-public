@@ -1,24 +1,15 @@
-﻿using Core.Enums;
-using Core.Messages;
-using Core.Exceptions;
-using System.Net;
-using UserRouting;
+﻿using Core.Messages;
 using Logging;
 using Core.Handlers;
 using Core.InterserverComs;
 using JSON;
-using Authentication;
-using Authentication.Responses;
-using Authentication.Requests;
-using Core.Messages.Messages;
-using Authentication.DAL;
 using Core.Interfaces;
 using Sessions;
-using Authentication.Messages;
 using WebAPI.Responses;
-using WebAPI.Requests;
+using Core;
+using WebAbstract.Requests;
 
-namespace Core.Authentication
+namespace WebAbstract.ClientEndpoints
 {
     public class IATClientEndpoint
     {
@@ -34,7 +25,7 @@ namespace Core.Authentication
             _Endpoint = endpoint;
             _Callback = callback;
             _RemoveMappings = clientMessageTypeMappingsHandler.AddRange(new TupleList<string, DelegateHandleMessageOfType<TypeTicketedAndWholePayload>> {
-                { global::MessageTypes.MessageTypes.IATAuthentication, HandleIATAuthentication}
+                { MessageTypes.IATAuthentication, HandleIATAuthentication}
             });
         }
         private void HandleIATAuthentication(TypeTicketedAndWholePayload t) {

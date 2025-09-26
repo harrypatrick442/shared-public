@@ -1,7 +1,4 @@
 ﻿using CircuitAnalysis.ComponentSpecs.Cores.CrossSection;
-using Core.Maths.Tensors;
-using System.Drawing;
-
 namespace CircuitAnalysis.ComponentSpecs
 {
     public class PC40_T80_20_50 : CoreSpecs

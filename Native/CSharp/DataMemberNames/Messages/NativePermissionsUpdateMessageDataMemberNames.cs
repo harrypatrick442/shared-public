@@ -4,7 +4,7 @@ using System.Net.NetworkInformation;
 
 namespace Native.DataMemberNames.Messages
 {
-    [MessageType(global::MessageTypes.MessageTypes.NativePermissionsUpdate)]
+    [MessageType(MessageTypes.NativePermissionsUpdate)]
     public static class NativePermissionsUpdateMessageDataMemberNames
     {
         public const string HasAllRequired = "a";

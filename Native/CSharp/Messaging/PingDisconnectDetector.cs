@@ -18,7 +18,7 @@ namespace Native.Messaging
             _TimerPing.AutoReset = true;
             _TimerPing.Elapsed += Ping;
             _RegistrationMessageHandler= registrationMessageHandler;
-            _RegistrationMessageHandler.RegisterMethod<PingMessage>(MessageTypes.MessageTypes.Ping, HandleIncomingPing);
+            _RegistrationMessageHandler.RegisterMethod<PingMessage>(MessageTypes.Ping, HandleIncomingPing);
         }
         private void HandleIncomingPing(PingMessage message)
         {

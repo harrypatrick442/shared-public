@@ -1,8 +1,10 @@
-﻿using FilesRelayCore.TransferServers;
+﻿using Core;
+using Core.LoadBalancing;
 using Logging;
 using Shutdown;
+using WebAbstract.MachineMetricsMesh;
 
-namespace Core.LoadBalancing
+namespace WebAbstract.LoadBalancing
 {
     public class RequestingLoadBalancerBase
     {
@@ -66,7 +68,7 @@ namespace Core.LoadBalancing
         private void StartUpdateLoop_LoadFactor(LoadFactorType loadFactorType) {
             Loop(() =>
             {
-                NodeIdAndLoadFactor[] NodeIdAndLoadFactors = MachineMetricsMesh.Instance.GetLoadFactors(_NodeIds, loadFactorType, _TimeoutMillisecondsGetMachineMetrics);
+                NodeIdAndLoadFactor[] NodeIdAndLoadFactors = MachineMetricsMesh.MachineMetricsMesh.Instance.GetLoadFactors(_NodeIds, loadFactorType, _TimeoutMillisecondsGetMachineMetrics);
                 return OrderNodesMostToLeastDesirable(NodeIdAndLoadFactors);
             });
         }

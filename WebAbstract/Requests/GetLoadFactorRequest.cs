@@ -1,11 +1,10 @@
-using Core.LoadBalancing;
 using Core.Messages.Messages;
-using MessageTypes.Internal;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 using WebAbstract.DataMemberNames.Interserver.Requests;
+using WebAbstract.LoadBalancing;
 
-namespace WebAPI.Requests
+namespace WebAbstract.Requests
 {
     [DataContract]
     public class GetLoadFactorRequest : TicketedMessageBase

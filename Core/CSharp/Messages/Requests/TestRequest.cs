@@ -10,7 +10,7 @@ namespace Core.Messages.Requests
     public class TestMessage : TicketedMessageBase
     {
 
-        public TestMessage(string value):base(global::MessageTypes.MessageTypes.Test)
+        public TestMessage(string value):base(MessageTypes.Test)
         {
             _Value = value;
         }

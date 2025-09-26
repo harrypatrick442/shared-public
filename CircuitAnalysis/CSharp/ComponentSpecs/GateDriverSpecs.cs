@@ -1,6 +1,4 @@
-﻿using Core.Maths.Tensors;
-using System.Drawing;
-
+﻿
 namespace CircuitAnalysis.ComponentSpecs
 {
     public abstract class GateDriverSpecs : SpecsBase

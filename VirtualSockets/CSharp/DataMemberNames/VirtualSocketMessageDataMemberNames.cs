@@ -2,7 +2,7 @@
 
 namespace VirtualSockets.DataMemberNames
 {
-    [MessageType(global::MessageTypes.MessageTypes.VirtualSocketMessage)]
+    [MessageType(MessageTypes.VirtualSocketMessage)]
     public class VirtualSocketMessageDataMemberNames
     {
         public const string Id = "i";

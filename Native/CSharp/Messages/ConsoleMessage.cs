@@ -19,14 +19,14 @@ namespace Native.Messages
         public ConsoleMessage(string message, bool isError = false)
             : base()
         {
-            Type = MessageTypes.MessageTypes.ConsoleMessage;
+            Type = MessageTypes.ConsoleMessage;
             Message = message;
             IsError = isError;
         }
         protected ConsoleMessage()
             : base()
         {
-            Type = MessageTypes.MessageTypes.ConsoleMessage;
+            Type = MessageTypes.ConsoleMessage;
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using Core.LoadBalancing;
-using Core.Machine;
 using Core.MemoryManagement;
-
-namespace FilesRelayCore.TransferServers
+using WebAbstract.LoadBalancing;
+using MachineMetrics = Core.Machine.MachineMetrics;
+namespace WebAbstract.MachineMetricsMesh
 {
     public partial class MachineMetricsMesh
     {

@@ -4,7 +4,7 @@ using JSON;
 using Core.Machine;
 using Microsoft.AspNetCore.Cors;
 
-namespace FilesRelayCore.Controllers
+namespace WebAbstract.Csontrollers
 {
     [EnableCors("MachineMetricsCors")]
     [Route("machineMetrics")]

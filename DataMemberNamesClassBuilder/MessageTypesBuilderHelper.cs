@@ -3,13 +3,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Core.Reflection;
-using MessageTypes.Attributes;
 using System.Collections.Generic;
-using Core.FileSystem;
 using System.IO;
 using Core.Strings;
-using Microsoft.Extensions.Primitives;
-using System.Web.Services.Description;
 
 namespace DataMemberNamesClassBuilder
 {

@@ -16,11 +16,11 @@ namespace Native.Requests
         [JsonInclude]
         [DataMember(Name = NativeStorageSetStringRequestDataMemberNames.Value)]
         public string Value { get; protected set; }
-        public NativeStorageSetStringRequest(string key, string value) : base(global::MessageTypes.MessageTypes.NativeStorageSetString) {
+        public NativeStorageSetStringRequest(string key, string value) : base(MessageTypes.NativeStorageSetString) {
             Key = key;
             Value = value;
         }
-        protected NativeStorageSetStringRequest() : base(global::MessageTypes.MessageTypes.NativeStorageSetString)
+        protected NativeStorageSetStringRequest() : base(MessageTypes.NativeStorageSetString)
         {
 
         }

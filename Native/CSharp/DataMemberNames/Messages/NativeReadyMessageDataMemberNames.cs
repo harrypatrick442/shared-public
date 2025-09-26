@@ -4,7 +4,7 @@ using System.Net.NetworkInformation;
 
 namespace Native.DataMemberNames.Messages
 {
-    [MessageType(global::MessageTypes.MessageTypes.NativeReadyMessage)]
+    [MessageType(MessageTypes.NativeReadyMessage)]
     public static class NativeReadyMessageDataMemberNames
     {
     }

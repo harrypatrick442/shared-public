@@ -2,7 +2,7 @@
 
 namespace Core.DataMemberNames.Requests
 {
-    [MessageType(global::MessageTypes.MessageTypes.ErrorMessage)]
+    [MessageType(MessageTypes.ErrorMessage)]
     public class ErrorMessageDataMemberNames
     {
         public const string Message = "m";

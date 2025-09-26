@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using Core.Messages.Messages;
 using VirtualSockets.DataMemberNames;
 
-namespace Core.VirtualSockets
+namespace VirtualSockets
 {
     [DataContract]
     public class NewVirtualSocket2:TypedMessageBase

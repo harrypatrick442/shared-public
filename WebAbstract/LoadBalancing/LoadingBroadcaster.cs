@@ -1,8 +1,8 @@
 using Logging;
-using FilesRelayCore.TransferServers;
 using Shutdown;
+using WebAbstract.MachineMetricsMesh;
 
-namespace Core.LoadBalancing
+namespace WebAbstract.LoadBalancing
 {
     public class LoadingBroadcaster
     {
@@ -37,7 +37,7 @@ namespace Core.LoadBalancing
                     if (loadFactor == _PreviousLoadFactor) return;
                 }
                 _PreviousLoadFactor = loadFactor;
-                MachineMetricsMesh.Instance.BroadcastNodeLoading(
+                MachineMetricsMesh.MachineMetricsMesh.Instance.BroadcastNodeLoading(
                     _NodeIdsToBroadcastTo, _LoadFactorType, loadFactor);
             }
             catch (Exception ex)

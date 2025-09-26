@@ -1,6 +1,4 @@
 ﻿using CircuitAnalysis.ComponentSpecs.Cores.CrossSection;
-using Core.Maths.Tensors;
-using System.Drawing;
 
 namespace CircuitAnalysis.ComponentSpecs
 {

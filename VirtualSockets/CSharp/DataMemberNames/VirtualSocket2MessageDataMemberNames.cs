@@ -1,10 +1,8 @@
 ﻿using MessageTypes.Attributes;
-using Core.DataMemberNames;
-using System.Net.NetworkInformation;
 
 namespace VirtualSockets.DataMemberNames
 {
-    [MessageType(global::MessageTypes.MessageTypes.VirtualSocket2Message)]
+    [MessageType(MessageTypes.VirtualSocket2Message)]
     public static class VirtualSocket2MessageDataMemberNames
     {
         public const string Secret = "s";

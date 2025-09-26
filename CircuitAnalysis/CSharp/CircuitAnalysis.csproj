@@ -12,6 +12,6 @@
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\shared-private\ModifiedNodalAnalysis\CSharp\ModifiedNodalAnalysis.csproj" />
+    <ProjectReference Include="..\..\Core\CSharp\Core.csproj" />
   </ItemGroup>
 </Project>

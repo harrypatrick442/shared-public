@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 using WebAbstract.DataMemberNames.Requests;
 
-namespace WebAPI.Requests
+namespace WebAbstract.Requests
 {
     [DataContract]
     public class IATAuthenticateRequest : TicketedMessageBase
@@ -21,7 +21,7 @@ namespace WebAPI.Requests
         [JsonInclude]
         [DataMember(Name = IATAuthenticateRequestDataMemberNames.Token)]
         public string Token { get; protected set; }
-        public IATAuthenticateRequest() : base(MessageTypes.MessageTypes.IATAuthentication)
+        public IATAuthenticateRequest() : base(MessageTypes.IATAuthentication)
         {
 
         }

@@ -2,7 +2,7 @@
 
 namespace Core.DataMemberNames.Messages
 {
-    [MessageType(global::MessageTypes.MessageTypes.Test)]
+    [MessageType(MessageTypes.Test)]
     public class TestMessageDataMemberNames
     {
         public const string Value = "v";

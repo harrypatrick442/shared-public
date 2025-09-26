@@ -4,10 +4,7 @@ using System.Text;
 using Core.Strings;
 using MessageTypes.Attributes;
 using System.Collections.Generic;
-using System.CodeDom;
-using AngleSharp.Io;
 using Core.DataMemberNames;
-using Core.Ticketing;
 using BaseMessages.Constants;
 
 namespace DataMemberNamesClassBuilder
@@ -331,7 +328,7 @@ namespace DataMemberNamesClassBuilder
             sbConstructor.AppendLine();
             sbConstructorPart2.AppendLine("{");
             sbConstructorPart2.AppendLine("}");
-            sbToJSON.AppendLine($"    JHelper::addString(j, \"{MessageTypes.MessageTypes.Type}\", TYPE);");
+            sbToJSON.AppendLine($"    JHelper::addString(j, \"{MessageTypeDataMemberName.Value}\", TYPE);");
             sbToJSON.AppendLine("    return j;");
             sbToJSON.AppendLine("}");
             sbFromJSONSecondPart.AppendLine(");");
@@ -605,7 +602,7 @@ namespace DataMemberNamesClassBuilder
             if (_MessageTypeAttribute != null)
             {
                 sb.Append("   r[\"");
-                sb.Append(MessageTypes.MessageTypes.Type);
+                sb.Append(MessageTypeDataMemberName.Value);
                 sb.Append("\"]=\"");
                 if (_MessageTypeAttribute == null)
                     throw new ArgumentException($"There was no {nameof(MessageTypeAttribute)} for type {_ClassName}");
