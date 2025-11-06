@@ -1,5 +1,4 @@
-﻿using Core.Exceptions;
-using InfernoDispatcher;
+﻿using Initialization.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -106,6 +105,11 @@ namespace TapoDevices
         private Func<List<DeviceInfo>?, IEnumerable<DeviceInfo>?> Create_MatchDeviceInfo(string? nickname) {
             return (deviceInfos) => deviceInfos
                     ?.Where(d => d.Nickname == nickname);
+        }
+        public List<DeviceInfo> ScanSync() {
+            var task = Scan();
+            task.Wait();
+            return task.Result;
         }
         public Task<List<DeviceInfo>> Scan()
         {

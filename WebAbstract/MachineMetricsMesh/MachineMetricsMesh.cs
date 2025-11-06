@@ -9,6 +9,7 @@ using Core;
 using JSON;
 using WebAbstract.LoadBalancing;
 using WebAbstract.Requests;
+using Initialization.Exceptions;
 
 namespace WebAbstract.MachineMetricsMesh
 {

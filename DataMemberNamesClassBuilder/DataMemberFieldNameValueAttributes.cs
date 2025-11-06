@@ -1,6 +1,6 @@
-﻿using System;
+﻿using MessageTypes.Attributes;
+using System;
 using System.Linq;
-using MessageTypes.Attributes;
 
 namespace DataMemberNamesClassBuilder
 {

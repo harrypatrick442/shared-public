@@ -9,7 +9,7 @@
     <None Include="HVPS.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\echat\Constants\GlobalConstants.csproj" />
     <ProjectReference Include="..\..\..\shared-private\MessageTypes\MessageTypes.csproj" />
+    <ProjectReference Include="..\..\ConfigurationCore\ConfigurationCore.csproj" />
   </ItemGroup>
 </Project>

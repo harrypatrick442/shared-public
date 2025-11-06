@@ -26,7 +26,20 @@ namespace DataMemberNamesClassBuilder
                 return CPlusPlusType.Double;
             if (type == typeof(bool))
                 return CPlusPlusType.Bool;
-            bool isNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+            if (type == typeof(Int16))
+                return CPlusPlusType.Int16;
+            if (type == typeof(Int32))
+                return CPlusPlusType.Int32;
+            if (type == typeof(Int64))
+                return CPlusPlusType.Int64;
+            if (type == typeof(UInt16))
+                return CPlusPlusType.UInt16;
+            if (type == typeof(UInt32))
+                return CPlusPlusType.UInt32;
+            if (type == typeof(UInt64))
+                return CPlusPlusType.UInt64;
+            bool isNullable = type.IsGenericType 
+                && type.GetGenericTypeDefinition() == typeof(Nullable<>);
             if (isNullable)
             {
                 Type innerType = Nullable.GetUnderlyingType(type)!;
@@ -48,6 +61,18 @@ namespace DataMemberNamesClassBuilder
                     return CPlusPlusType.NullableDouble;
                 if (innerType == typeof(bool))
                     return CPlusPlusType.NullableBool;
+                if (innerType == typeof(Int16))
+                    return CPlusPlusType.NullableInt16;
+                if (innerType == typeof(Int32))
+                    return CPlusPlusType.NullableInt32;
+                if (innerType == typeof(Int64))
+                    return CPlusPlusType.NullableInt64;
+                if (innerType == typeof(UInt16))
+                    return CPlusPlusType.NullableUInt16;
+                if (innerType == typeof(UInt32))
+                    return CPlusPlusType.NullableUInt32;
+                if (innerType == typeof(UInt64))
+                    return CPlusPlusType.NullableUInt64;
                 if (innerType.IsEnum)
                 {
                     return CPlusPlusType.NullableInt32;

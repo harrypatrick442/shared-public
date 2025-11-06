@@ -10,11 +10,13 @@ namespace Native.Messaging
         private readonly object _LockObject = new object();
         private bool _SeenPing = true;
         private Action _Disconnected;
-        public PingDisconnectDetector(RegistrationMessageHandler registrationMessageHandler,
-            Action disconnected) {
+        public PingDisconnectDetector(
+            RegistrationMessageHandler registrationMessageHandler,
+            Action disconnected,
+            int intervalMilliseconds = 5000) {
             _Disconnected = disconnected;
             PING_MESSAGE_STRING = Json.Serialize(new PingMessage());
-            _TimerPing = new System.Timers.Timer(interval: 5000);
+            _TimerPing = new System.Timers.Timer(interval: intervalMilliseconds);
             _TimerPing.AutoReset = true;
             _TimerPing.Elapsed += Ping;
             _RegistrationMessageHandler= registrationMessageHandler;

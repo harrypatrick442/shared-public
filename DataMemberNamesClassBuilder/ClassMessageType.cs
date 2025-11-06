@@ -22,7 +22,10 @@ namespace DataMemberNamesClassBuilder
                 .SelectMany(GetTypesInNamespace)
                 .Where(t => t.Namespace.Contains(namespaceMustContain)).ToArray();
             DataMemberNamesClass[] toExportsInternal = dataMemberNamesTypes
-                .Select(d=>GetDataMemberNamesClass(d, getTypeFromActualUse)).ToArray();
+                .Select(d=>
+                {
+                    return GetDataMemberNamesClass(d, getTypeFromActualUse);
+                }).ToArray();
             toExports = toExportsInternal;
             getDataMemberNamesClass = 
                 (type) => toExportsInternal

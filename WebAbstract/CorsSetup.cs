@@ -282,7 +282,7 @@ namespace WebAbstract
                 Nodes.Nodes.Instance.GetNodesConnectedToNode(Nodes.Nodes.Instance.MyId)
                 .Select(n=>n.Id).Concat(new int[] { Nodes.Nodes.Instance.MyId })
                 .SelectMany(n =>
-                    GlobalConstants.Nodes.GetDomainsForNode(n))
+                    new Configurations.Nodes().GetDomainsForNode(n))
                 .Select(d => $"https://{d}")
 #if DEBUG
                 .Concat(new string[] { 

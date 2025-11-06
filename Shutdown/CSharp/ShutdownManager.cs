@@ -1,4 +1,4 @@
-﻿using Core.Exceptions;
+﻿using Initialization.Exceptions;
 using Logging;
 
 namespace Shutdown

@@ -1,4 +1,4 @@
-﻿using GlobalConstants;
+﻿using ConfigurationCore;
 
 namespace BaseMessages.Constants
 {

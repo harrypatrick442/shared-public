@@ -5,7 +5,7 @@ using System.Net;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace Core.Exceptions
+namespace Initialization.Exceptions
 {
     [DataContract]
     public class NotInitializedException:InvalidOperationException

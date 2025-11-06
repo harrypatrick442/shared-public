@@ -5,6 +5,9 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using Initialization.Exceptions;
+using DependencyManagement;
+using ConfigurationCore;
 
 namespace Core.MemoryManagement
 {
@@ -32,16 +35,19 @@ namespace Core.MemoryManagement
         private int _SubDelayMilliseconds;
         private ProcessorMetricsSource()
         {
-            if (GlobalConstants.Delays.PROCESSOR_METRICS_MIN_DELAY_UPDATE_LATEST_MILLISECONDS <= GlobalConstants.Delays.MAX_SUB_DELAY_MILLISECONDS)
+            var delaysConfiguration = DependencyManager.Get<IDelaysConfiguration>();
+            int minDelayUpdateLatestMilliseconds = delaysConfiguration.ProcessorMetricsMinDelayUpdateLatestMilliseconds;
+            int maxSubDelayMilliseconds = delaysConfiguration.MaxSubDelayMilliseconds;
+            if (minDelayUpdateLatestMilliseconds <= maxSubDelayMilliseconds)
             {
                 _NDelays = 1;
-                _SubDelayMilliseconds = GlobalConstants.Delays.PROCESSOR_METRICS_MIN_DELAY_UPDATE_LATEST_MILLISECONDS;
+                _SubDelayMilliseconds = minDelayUpdateLatestMilliseconds;
             }
             else
             {
-                _NDelays = (int)Math.Ceiling((double)GlobalConstants.Delays.PROCESSOR_METRICS_MIN_DELAY_UPDATE_LATEST_MILLISECONDS
-                    / GlobalConstants.Delays.MAX_SUB_DELAY_MILLISECONDS);
-                _SubDelayMilliseconds = GlobalConstants.Delays.PROCESSOR_METRICS_MIN_DELAY_UPDATE_LATEST_MILLISECONDS / _NDelays;
+                _NDelays = (int)Math.Ceiling((double)minDelayUpdateLatestMilliseconds
+                    / maxSubDelayMilliseconds);
+                _SubDelayMilliseconds = minDelayUpdateLatestMilliseconds / _NDelays;
             }
             _Latest = new ProcessorMetrics(0, 50);
             StartUpdateLooper();
@@ -120,7 +126,7 @@ namespace Core.MemoryManagement
                 catch { return 0; }
             });
 
-            System.Threading.Thread.Sleep(GlobalConstants.Delays.PROCESSOR_METRICS_DELAY_TOTAL_PROCESSOR_TIME_MILLISECONDS);
+            System.Threading.Thread.Sleep(DependencyManager.Get<IDelaysConfiguration>().ProcessorMetricsDelayTotalProcessorTimeMilliseconds);
 
             long endMilliseconds = TimeHelper.MillisecondsNow;
             double endCpuUsedMilliseconds = getProcesses().Sum(a =>

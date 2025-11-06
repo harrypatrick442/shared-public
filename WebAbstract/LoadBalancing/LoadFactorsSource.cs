@@ -1,4 +1,5 @@
 ﻿using Core.Exceptions;
+using Initialization.Exceptions;
 namespace WebAbstract.LoadBalancing
 {
     public sealed class LoadFactorsSource

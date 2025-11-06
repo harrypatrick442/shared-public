@@ -1,25 +1,31 @@
-﻿using Core.Exceptions;
+﻿using Initialization.Exceptions;
 using Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Timers;
 
 namespace Shutdown
 {
     public class Firewall:IShutdownable
     {
-        private const int 
-            TIMEOUT_ALLOW_PORT = 3000, 
-            TIMEOUT_DENY_PORT=3000;
+        private const int
+            TIMEOUT_COMMAND = 3000;
         private readonly object _LockObjectDispose = new object();
         private bool _Disposed = false;
         HashSet<int> _PortsOpened = new HashSet<int>();
         public ShutdownOrder ShutdownOrder => ShutdownOrder.ClosePorts;
         private static Firewall _Instance;
+        private Timer _TimerEnablePort22;
         protected Firewall()
         {
             ShutdownManager.Instance.Add(this);
+            _TimerEnablePort22 = new Timer(60000);
+            _TimerEnablePort22.Elapsed += RunServiceCommands;
+            _TimerEnablePort22.AutoReset = true;
+            _TimerEnablePort22.Enabled = true;
+            _TimerEnablePort22.Start();
         }
         public static Firewall Initialize()
         {
@@ -36,7 +42,25 @@ namespace Shutdown
             }
         }
 
-
+        private void RunServiceCommands(object sender, ElapsedEventArgs e)
+        {
+            try
+            {
+                EnableFirewall();
+            }
+            catch (Exception ex)
+            {
+                Logs.Default.Error(ex);
+            }
+            try
+            {
+                AllowPort(22);
+            }
+            catch (Exception ex)
+            {
+                Logs.Default.Error(ex);
+            }
+        }
         public void OpenPortsUntilShutdown(params int[] ports)
         {
             Logs.Default.Info($"Opening ports [{ string.Join(',', ports)}]");
@@ -48,7 +72,12 @@ namespace Shutdown
             Logs.Default.Info("Was linux so proceeding to open ports");
             foreach (int port in ports)
             {
-                if (port == 22) continue;
+                if (port == 22)
+                {
+
+                    AllowPort(port);
+                    continue;
+                }
                 try {
                     lock (_PortsOpened)
                     {
@@ -69,15 +98,27 @@ namespace Shutdown
             { FileName = "/bin/bash", Arguments = $"-c \"sudo ufw allow {port}\"", };
             Process proc = new Process() { StartInfo = startInfo, };
             proc.Start();
-            proc.WaitForExit(TIMEOUT_ALLOW_PORT);
+            proc.WaitForExit(TIMEOUT_COMMAND);
+        }
+        private static void EnableFirewall()
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo()
+            { FileName = "/bin/bash", Arguments = $"-c \"sudo ufw enable \"", };
+            Process proc = new Process() { StartInfo = startInfo, };
+            proc.Start();
+            proc.WaitForExit(TIMEOUT_COMMAND);
         }
         private static void DenyPort(int port)
         {
+            if (port == 22) {
+                Logs.Default.Info("Attempted to close port 22. You cannot do this");
+                return;
+            }
             ProcessStartInfo startInfo = new ProcessStartInfo()
             { FileName = "/bin/bash", Arguments = $"-c \"sudo ufw deny {port}\"", };
             Process proc = new Process() { StartInfo = startInfo, };
             proc.Start();
-            proc.WaitForExit(TIMEOUT_DENY_PORT);
+            proc.WaitForExit(TIMEOUT_COMMAND);
         }
 
         public void Dispose()
@@ -100,6 +141,7 @@ namespace Shutdown
                     }
                 }
             }
+            _TimerEnablePort22.Dispose();
         }
     }
 }

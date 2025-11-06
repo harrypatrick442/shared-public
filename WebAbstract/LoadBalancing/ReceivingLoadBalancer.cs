@@ -2,6 +2,7 @@
 using Core.Exceptions;
 using InterserverComs;
 using WebAbstract.LoadBalancing;
+using Initialization.Exceptions;
 
 namespace WebAbstract.LoadBalancing
 {

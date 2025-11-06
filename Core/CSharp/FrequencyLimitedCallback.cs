@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
-using Core.Exceptions;
 using InfernoDispatcher;
+using Initialization.Exceptions;
 using Shutdown;
 
 namespace Core

@@ -1,7 +1,7 @@
 ﻿
 using ManagedCuda.Nvml;
 using Shutdown;
-using Core.Exceptions;
+using Initialization.Exceptions;
 namespace Core.MemoryManagement
 
 {

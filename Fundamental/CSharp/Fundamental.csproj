@@ -6,6 +6,7 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\echat\Constants\GlobalConstants.csproj" />
+    <ProjectReference Include="..\..\ConfigurationCore\ConfigurationCore.csproj" />
+    <ProjectReference Include="..\..\DependencyManagement\DependencyManagement.csproj" />
   </ItemGroup>
 </Project>

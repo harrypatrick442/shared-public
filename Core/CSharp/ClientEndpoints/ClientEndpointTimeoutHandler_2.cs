@@ -2,6 +2,8 @@ using Shutdown;
 using Core.Timing;
 using System;
 using Timer = System.Timers.Timer;
+using DependencyManagement;
+using ConfigurationCore;
 namespace Core.ClientEndpoints
 {
     public sealed class ClientEndpointTimeoutHandler_2<TClientEndpoint> 
@@ -18,7 +20,8 @@ namespace Core.ClientEndpoints
             ShutdownManager.Instance.Add(Dispose, ShutdownOrder.ClientEndpointTimeoutHandler);
         }
         private void StartTimeout() {
-            _Timer = new Timer(GlobalConstants.Timeouts.CLIENT_ENDPOINT_TIMEOUT_HANDLER_INTERVAL_DO_TIMEOUTS_MILLISECONDS);
+            _Timer = new Timer(DependencyManager.Get<ITimeoutsConfiguration>()
+                .ClientEndpointTimeoutHandlerIntervalDoTimeoutsMilliseconds);
             _Timer.Elapsed += DoTimeouts;
             _Timer.AutoReset = true;
             _Timer.Enabled = true;

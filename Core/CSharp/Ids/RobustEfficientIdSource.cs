@@ -22,7 +22,10 @@ namespace Core.Ids
         private string _ErrorFilePath, _DidShutdownSaveFilePath;
         private bool _DidShutdownSaveFileExisted;
         protected readonly object _LockObject = new object();
-        protected RobustEfficientIdSource(int nFiles, string directoryPath, string fileNamePrefix)
+        protected RobustEfficientIdSource(
+            int nFiles, 
+            string directoryPath, 
+            string fileNamePrefix)
         {
             _NFiles = nFiles;
             _FilePaths = new string[_NFiles];
@@ -131,7 +134,9 @@ namespace Core.Ids
             }
             try
             {
-                File.WriteAllText(_FilePaths[0], content);
+                string filePath = _FilePaths[0];
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+                File.WriteAllText(filePath, content);
             }
             catch (Exception ex) { 
                 Logs.HighPriority.Error(ex);

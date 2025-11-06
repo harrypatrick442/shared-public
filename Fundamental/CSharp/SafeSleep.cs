@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
+using ConfigurationCore;
 using Core.Timing;
+using DependencyManagement;
 namespace Core.Threading {
     public static class SafeSleep
     {
@@ -46,7 +48,7 @@ namespace Core.Threading {
         {
             if (delayMilliseconds <= 0) 
                 throw new ArgumentException(nameof(delayMilliseconds));
-            int nIntervals = (int)Math.Ceiling((double)delayMilliseconds / GlobalConstants.Intervals.SLEEP_BETWEEN_DISPOSED_CHECK_INTERVAL);
+            int nIntervals = (int)Math.Ceiling((double)delayMilliseconds / DependencyManager.Get<IIntervalsConfiguration>().SleepBetweenDisposedCheckIntervals);
             int intervalDelay = delayMilliseconds / nIntervals;
             return () => {
                 for (int i = 0; i < nIntervals; i++) {

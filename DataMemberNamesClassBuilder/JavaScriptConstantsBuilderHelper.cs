@@ -5,7 +5,7 @@ using System.Text;
 using Core.Reflection;
 using System.Collections.Generic;
 using System.IO;
-using GlobalConstants;
+using ConfigurationCore;
 
 namespace DataMemberNamesClassBuilder
 {

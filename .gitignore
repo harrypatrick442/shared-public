@@ -68,3 +68,5 @@ DataMemberNamesClassBuilder/DataMemberNamesClassBuilder.csproj.user
 /JSON/CSharp/bin
 /Fundamental/CSharp/bin
 /DataMemberNamesClassBuilder/.vs
+/ConfigurationCore/bin
+/ConfigurationCore/obj

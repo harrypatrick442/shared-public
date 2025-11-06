@@ -6,6 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Initialization.Exceptions;
+using DependencyManagement;
+using ConfigurationCore;
 
 namespace Core.ClientEndpoints
 {
@@ -48,15 +51,18 @@ namespace Core.ClientEndpoints
             }
         }
         private void _TimeoutLooper() {
+            int sleepBetweenDisposedCheckInterval = 
+                    DependencyManager.Get<IIntervalsConfiguration>().SleepBetweenDisposedCheckIntervals;
             while (true)
             {
                 try
                 {
                     if (_CancellationTokenSourceDisposed.IsCancellationRequested) return;
-                    int n = GlobalConstants.Timeouts.CLIENT_ENDPOINT_TIMEOUT_HANDLER_INTERVAL_DO_TIMEOUTS_MILLISECONDS / GlobalConstants.Intervals.SLEEP_BETWEEN_DISPOSED_CHECK_INTERVAL;
+                    int n = DependencyManager.Get<ITimeoutsConfiguration>().ClientEndpointTimeoutHandlerIntervalDoTimeoutsMilliseconds
+                        / sleepBetweenDisposedCheckInterval;
                     for (int i = 0; i < n; i++)
                     {
-                        Thread.Sleep(GlobalConstants.Intervals.SLEEP_BETWEEN_DISPOSED_CHECK_INTERVAL);
+                        Thread.Sleep(sleepBetweenDisposedCheckInterval);
                         if (_CancellationTokenSourceDisposed.IsCancellationRequested) return;
                     }
                     _DoTimeouts();

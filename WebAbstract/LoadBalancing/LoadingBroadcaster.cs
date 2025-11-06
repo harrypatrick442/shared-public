@@ -19,7 +19,7 @@ namespace WebAbstract.LoadBalancing
             _LoadFactorType = loadFactorType;
             _GetLoadFactor = getLoadFactor;
             _TimerBroadcastLoading = new System.Timers.Timer(
-                GlobalConstants.Intervals.BROADCAST_WEBSOCKET_LOADING);
+                Configurations.Intervals.BROADCAST_WEBSOCKET_LOADING);
             _TimerBroadcastLoading.Elapsed += BroadcastLoading;
             _TimerBroadcastLoading.AutoReset = true;
             _TimerBroadcastLoading.Enabled = true;
