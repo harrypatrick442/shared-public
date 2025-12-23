@@ -1,3 +1,4 @@
+
 namespace JSON
 {
 	public class Json
@@ -8,7 +9,13 @@ namespace JSON
 		{
 			return _Instance.Deserialize<TType>(json);
 		}
-		public static string Serialize<TType>(TType instance, bool prettify = false)
+
+        public static T Deserialize<T>(object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static string Serialize<TType>(TType instance, bool prettify = false)
 		{
 			string serialized =  _Instance.Serialize(instance, prettify);
 			return serialized;

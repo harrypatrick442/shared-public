@@ -82,6 +82,11 @@ namespace TapoDevices
             return await FindDevice<TapoPlug>(nickname,
                 (deviceInfo) => new TapoPlug(deviceInfo.IPAddress, _Credentials));
         }
+        public async Task<TapoBulb?> FindBulb(string? nickname)
+        {
+            return await FindDevice<TapoBulb>(nickname,
+                (deviceInfo) => new TapoBulb(deviceInfo.IPAddress, _Credentials));
+        }
         public async Task<TDevice?> FindDevice<TDevice>(
             string? nickname, Func<DeviceInfo, TDevice> createDevice)
         where TDevice:class{

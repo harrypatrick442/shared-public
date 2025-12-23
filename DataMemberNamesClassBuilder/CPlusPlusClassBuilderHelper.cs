@@ -8,7 +8,7 @@ namespace DataMemberNamesClassBuilder
     {
 
         public static void Run(string outputDirectory, string namespaceMustContain,
-            Type[] typeInEachNamespace)
+            Type[] typeInEachNamespace, ReservedKey[]? reservedKeys)
         {
             DirectoryHelper.DeleteRecursively(outputDirectory, throwOnError: false);
             Directory.CreateDirectory(outputDirectory);
@@ -26,7 +26,8 @@ namespace DataMemberNamesClassBuilder
                     $"{dataMemberNameClass.ClassName}.cpp");
 
                 dataMemberNameClass.ToCPlusPlusClassStrings(
-                getDataMemberNamesClass, out string hpp, out string cpp);
+                getDataMemberNamesClass, out string hpp, out string cpp,
+                reservedKeys);
                 File.WriteAllText(
                     hppFilePath, hpp
                 );

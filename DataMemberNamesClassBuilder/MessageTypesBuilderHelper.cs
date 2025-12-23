@@ -28,7 +28,8 @@ namespace DataMemberNamesClassBuilder
                             fieldInfo.Name,
                             (string)fieldInfo.GetValue(null),
                             AttributesHelper.GetAttributes(fieldInfo),
-                            messageTypesType, null
+                            messageTypesType, null,
+                            null
                         )
                     )
                 );

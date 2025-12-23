@@ -11,6 +11,7 @@ using Core.Maths.CUBLAS;
 using Core.Pool;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Collections;
 
 
 namespace Core.Maths.BlockOperationMatrices
@@ -48,46 +49,49 @@ namespace Core.Maths.BlockOperationMatrices
             byte[] data)
             : base(nRows, nColumns, workingDirectoryManager)
         {
-            UsingFileStreamAtBeginning(fs =>
-            fs.Write(data, 0, data.Length));
+            double[] doubleArray = new double[nRows * nColumns];
+            Buffer.BlockCopy(data, 0, doubleArray, 0, data.Length);
+            UsingBlockMatrixWriter(bmw =>
+                bmw.Write(doubleArray));
         }
 
         private void WriteToDiskNoLock(double[][] data)
         {
-            UsingFileStreamAtBeginning(fs =>
+            UsingBlockMatrixWriter(bmw =>
             {
-                byte[] buffer = new byte[NColumns * sizeof(double)];
+                double[] buffer = new double[NColumns];
                 for (int row = 0; row < NRows; row++)
                 {
                     if (data[row].Length != NColumns)
                     {
                         throw new ArgumentException("All rows must have the same number of columns.");
                     }
-                    System.Buffer.BlockCopy(data[row], 0, buffer, 0, NColumns * sizeof(double));
-                    fs.Write(buffer, 0, buffer.Length);
+                    Array.Copy(data[row], 0, buffer, 0, NColumns);
+                    bmw.Write(buffer);
                 }
             });
         }
-        private void WriteToDiskNoLockRowMajor(double[] data)
+        private void WriteToDiskNoLockRowMajor(double[] src)
         {
-            if (data.Length != NRows * NColumns)
+            if (src.Length != NRows * NColumns)
             {
                 throw new ArgumentException("Data size does not match _Matrix dimensions.");
             }
-            UsingFileStreamAtBeginning(fs =>
+            UsingBlockMatrixWriter(bmw =>
             {
-                byte[] buffer = new byte[NColumns * sizeof(double)];
+                double[] buffer = new double[NColumns];
 
                 for (int row = 0; row < NRows; row++)
                 {
                     // Copy row data from the 1D array into the buffer
-                    Buffer.BlockCopy(data, row * NColumns * sizeof(double), buffer, 0, NColumns * sizeof(double));
+                    Array.Copy(src, row * NColumns, buffer, 0, NColumns);
 
                     // Write the buffer (row) to the file
-                    fs.Write(buffer, 0, buffer.Length);
+                    bmw.Write(buffer);
                 }
             });
         }
+
         private void WriteToDiskNoLockColumnMajor(double[] data)
         {
             if (data.Length != NRows * NColumns)
@@ -95,22 +99,22 @@ namespace Core.Maths.BlockOperationMatrices
                 throw new ArgumentException("Data size does not match _Matrix dimensions.");
             }
 
-            UsingFileStreamAtBeginning(fs =>
+            UsingBlockMatrixWriter(bmw =>
             {
-                byte[] buffer = new byte[NColumns * sizeof(double)];
 
                 // Loop over rows and write column-major data row by row
                 for (int row = 0; row < NRows; row++)
                 {
+                    double[] buffer = new double[NColumns];
                     for (int col = 0; col < NColumns; col++)
                     {
                         // Column-major indexing: col * NRows + row
                         double value = data[col * NRows + row];
-                        BitConverter.GetBytes(value).CopyTo(buffer, col * sizeof(double));
+                        buffer[col] = value;
                     }
 
                     // Write the buffer (representing a full row in column-major order) to the file
-                    fs.Write(buffer, 0, buffer.Length);
+                    bmw.Write(buffer);
                 }
             });
         }
@@ -547,9 +551,9 @@ namespace Core.Maths.BlockOperationMatrices
             BlockOperationMatrixNonPartitioned result = new BlockOperationMatrixNonPartitioned(
                 NRows, NColumns, _WorkingDirectoryManager);
             cleanupHandlerCaller?.Add(result);
-            result.UsingBinaryWriter(resultWriter =>
+            result.UsingBlockMatrixWriter(resultWriter =>
             {
-                this.UsingBinaryReader(reader =>
+                this.UsingBlockMatrixReader(reader =>
                 {
                     for (int i = 0; i < NRows; i++)
                     {
@@ -578,7 +582,7 @@ namespace Core.Maths.BlockOperationMatrices
             double[] results = new double[NRows];
 
             // Ensure the reader starts from the beginning of the file for each row read.
-            this.UsingBinaryReader(reader =>
+            this.UsingBlockMatrixReader(reader =>
             {
                 int resultIndex = 0; // Tracks which result index we are on
                 int r = 0;           // Tracks the current row index
@@ -614,9 +618,9 @@ namespace Core.Maths.BlockOperationMatrices
             BlockOperationMatrixNonPartitioned result = new BlockOperationMatrixNonPartitioned(
                 NRows, NColumns, _WorkingDirectoryManager);
             cleanupHandlerCaller?.Add(result);
-            result.UsingBinaryWriter(resultWriter =>
+            result.UsingBlockMatrixWriter(resultWriter =>
             {
-                BlockOperationMatrix.UsingBinaryReaders(this, other, (readerA, readerB) =>
+                BlockOperationMatrix.UsingBlockMatrixReaders(this, other, (readerA, readerB) =>
                 {
                     for (int i = 0; i < NRows; i++)
                     {
@@ -636,18 +640,17 @@ namespace Core.Maths.BlockOperationMatrices
             lock (_LockObjectFileAccess)
             {
                 double[][] result = new double[NRows][];
-                UsingFileStreamAtBeginning(fs =>
+                UsingBlockMatrixReader(bmr =>
                 {
-                    byte[] buffer = new byte[NColumns * sizeof(double)]; // Buffer to hold a row (NColumns * 8 bytes)
+                    double[] buffer = new double[NColumns]; // Buffer to hold a row (NColumns * 8 bytes)
                     for (int row = 0; row < NRows; row++)
                     {
-                        int bytesRead = fs.Read(buffer, 0, buffer.Length);
-                        if (bytesRead != buffer.Length)
+                        double[] values = bmr.Read(NColumns);
+                        if (values.Length != NColumns)
                         {
                             throw new EndOfStreamException("Unexpected end of file while reading double values.");
                         }
-                        result[row] = new double[NColumns];
-                        Buffer.BlockCopy(buffer, 0, result[row], 0, buffer.Length);
+                        result[row] = values;
                     }
                 });
                 return result;
@@ -664,9 +667,9 @@ namespace Core.Maths.BlockOperationMatrices
             // Validate that the result matrix can accommodate the data based on the provided offsets
             if (offsetTop < 0 || offsetLeft < 0 || offsetTop + NRows > result.Length || offsetLeft + NColumns > result[0].Length)
             {
-                throw new ArgumentOutOfRangeException("Offsets and result size do not allow for reading data into the specified region.");
+                throw new ArgumentOutOfRangeException("Offsets and result size do not allow for reading src into the specified region.");
             }
-            UsingBinaryReader((br =>
+            UsingBlockMatrixReader((br =>
             {
                 for (int i = 0; i < NRows; i++)
                 {
@@ -709,18 +712,14 @@ namespace Core.Maths.BlockOperationMatrices
         // Create a 1D array to store the matrix in column-major order
         double[] result = new double[NRows * NColumns];
 
-
-        // Buffer to hold a row of doubles (NColumns * 8 bytes per row)
-        byte[] buffer = new byte[NColumns * sizeof(double)];
-
-        UsingFileStreamAtBeginning(fs =>
+        UsingBlockMatrixReader(bmr =>
         {
             // Loop over rows and columns, and populate the result in column-major order
             for (int row = 0; row < NRows; row++)
             {
                 // Read a full row (as bytes) into the buffer
-                int bytesRead = fs.Read(buffer, 0, buffer.Length);
-                if (bytesRead != buffer.Length)
+                double[] values = bmr.Read(NColumns);
+                if (values.Length != NColumns)
                 {
                     throw new EndOfStreamException("Unexpected end of file while reading double values.");
                 }
@@ -729,7 +728,7 @@ namespace Core.Maths.BlockOperationMatrices
                 for (int col = 0; col < NColumns; col++)
                 {
                     // Column-major indexing: col * NRows + row
-                    result[col * NRows + row] = BitConverter.ToDouble(buffer, col * sizeof(double));
+                    result[col * NRows + row] = values[col];
                 }
             }
         });

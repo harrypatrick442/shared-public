@@ -16,9 +16,10 @@ namespace DataMemberNamesClassBuilder
         Int32,
         Int64,
         UInt64,
+        Float,
         Double,
         Bool,
-        NullableCharPointer,
+        //NullableCharPointer,
         NullableInt8,
         NullableUInt8,
         NullableInt16,
@@ -27,6 +28,7 @@ namespace DataMemberNamesClassBuilder
         NullableUInt32,
         NullableInt64,
         NullableUInt64,
+        NullableFloat,
         NullableDouble,
         NullableBool,
         Class,
@@ -36,7 +38,7 @@ namespace DataMemberNamesClassBuilder
     {
         public static bool IsClass(this CPlusPlusType type)
         {
-            return type.Equals(CPlusPlusType.Class);
+            return type.Equals(CPlusPlusType.Class)|| type.Equals(CPlusPlusType.NullableClass);
         }
         public static bool IsUnknown(this CPlusPlusType type)
         {
@@ -55,9 +57,10 @@ namespace DataMemberNamesClassBuilder
                 CPlusPlusType.UInt32 => "uint32_t",
                 CPlusPlusType.Int64 => "int64_t",
                 CPlusPlusType.UInt64 => "uint64_t",
+                CPlusPlusType.Float => "float",
                 CPlusPlusType.Double => "double",
                 CPlusPlusType.Bool => "bool",
-                CPlusPlusType.NullableCharPointer => "std::optional<const char*>",
+                //CPlusPlusType.NullableCharPointer => "std::optional<const char*>",
                 CPlusPlusType.NullableInt8 => "std::optional<int8_t>",
                 CPlusPlusType.NullableUInt8 => "std::optional<uint8_t>",
                 CPlusPlusType.NullableInt16 => "std::optional<int16_t>",
@@ -66,6 +69,7 @@ namespace DataMemberNamesClassBuilder
                 CPlusPlusType.NullableUInt32 => "std::optional<uint32_t>",
                 CPlusPlusType.NullableInt64 => "std::optional<int64_t>",
                 CPlusPlusType.NullableUInt64 => "std::optional<uint64_t>",
+                CPlusPlusType.NullableFloat => "std::optional<float>",
                 CPlusPlusType.NullableDouble => "std::optional<double>",
                 CPlusPlusType.NullableBool => "std::optional<bool>",
                 _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)

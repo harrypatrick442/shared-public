@@ -1,7 +1,9 @@
 ﻿using Core.Reflection;
+using DataMemberNamesClassBuilder.Delegates.ToCPlusPlus;
 using MessageTypes.Attributes;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -17,7 +19,8 @@ namespace DataMemberNamesClassBuilder
             out Type[] dataMemberNamesTypes,
             out DataMemberNamesClass[] toExports,
             out Func<Type, DataMemberNamesClass> getDataMemberNamesClass) {
-            Func<FieldInfo, Type, Type> getTypeFromActualUse = Create_GetTypeFromActualUse();
+            DelegateGetTypeAndContainingTypeFromActualUse getTypeFromActualUse = 
+                Create_GetTypeFromActualUse();
             dataMemberNamesTypes = typeInEachNamespace
                 .SelectMany(GetTypesInNamespace)
                 .Where(t => t.Namespace.Contains(namespaceMustContain)).ToArray();
@@ -35,7 +38,7 @@ namespace DataMemberNamesClassBuilder
         }
         private static DataMemberNamesClass GetDataMemberNamesClass(
             Type dataMemberNamesType,
-            Func<FieldInfo, Type, Type> getTypeFromActualUse)
+            DelegateGetTypeAndContainingTypeFromActualUse getTypeFromActualUse)
         {
 
             List<Type> typeAndBaseTypes = new List<Type> { };
@@ -48,12 +51,20 @@ namespace DataMemberNamesClassBuilder
             List<DataMemberFieldNameValueAttributes> dataMemberFieldNameValuePairs = new List<DataMemberFieldNameValueAttributes>();
             foreach (Type type in typeAndBaseTypes)
             {
+
                 FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Static);
                 dataMemberFieldNameValuePairs.AddRange(
                     fieldInfos
-                    .Select(fieldInfo => new DataMemberFieldNameValueAttributes(fieldInfo.Name,
-                    (string)fieldInfo.GetValue(null), AttributesHelper.GetAttributes(fieldInfo), type,
-                    typeFromActualUse:getTypeFromActualUse(fieldInfo, type))));
+                    .Select(fieldInfo =>
+                    {
+                        var typeFromActualUse = 
+                            getTypeFromActualUse(fieldInfo, type, 
+                                out Type? consumingType);
+                        return new DataMemberFieldNameValueAttributes(fieldInfo.Name,
+                        (string)fieldInfo.GetValue(null), AttributesHelper.GetAttributes(fieldInfo), type,
+                        typeFromActualUse,
+                        consumingType);
+                    }));
             }
             DataMemberFieldNameValueAttributes[][] duplicatedDataMemberFieldNameValuePairs =
                 dataMemberFieldNameValuePairs.GroupBy(d => d.Value).Where(g => g.Count() > 1).Select(g => g.ToArray()).ToArray();
@@ -66,8 +77,9 @@ namespace DataMemberNamesClassBuilder
             return new DataMemberNamesClass(dataMemberNamesType.Name,
                 dataMemberFieldNameValuePairs.ToArray(), messageTypeAttribute);
         }
-        private static Func<FieldInfo, Type, Type?> Create_GetTypeFromActualUse() { 
-            return (fieldInfo, dataMemberNamesClassType) => {
+        private static DelegateGetTypeAndContainingTypeFromActualUse Create_GetTypeFromActualUse() { 
+            return (FieldInfo fieldInfo, Type dataMemberNamesClassType,
+                out Type? consumingClassType) => {
                 string actualClassName = dataMemberNamesClassType.Name;
                 int indexOfDataMemberNamesString = actualClassName.LastIndexOf("DataMemberNames");
                 if (indexOfDataMemberNamesString + 15 != actualClassName.Length) {
@@ -85,14 +97,15 @@ namespace DataMemberNamesClassBuilder
                         t.Name == nameOfConsumingClassToSearchFor)
                     .ToArray();
                 string? obfuscatedName = (string?)fieldInfo.GetValue(null);
-                Type[] consumingClassPropertyTypes = consumingClassTypes.SelectMany(
+                var consumingClassPropertyTypeAndClassType_s = consumingClassTypes.SelectMany(
                     c=>
                 c.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Select(p=>new
                 {
                     dataMemberAttribute = (DataMemberAttribute?)p.GetCustomAttribute(typeof(DataMemberAttribute), true),
                     jsonPropertyNameAttribute = (JsonPropertyNameAttribute?)p.GetCustomAttribute(typeof(JsonPropertyNameAttribute)),
-                    propertyInfo = p
+                    propertyInfo = p,
+                    consumingClassType=c
                 }
                 )
                 .Where(o=>
@@ -101,14 +114,19 @@ namespace DataMemberNamesClassBuilder
                     || (o.jsonPropertyNameAttribute != null && o.jsonPropertyNameAttribute.Name == obfuscatedName)
                     ;
                 })
-                .Select(o=>o.propertyInfo.PropertyType))
+                .Select(o=>new {
+                        propertyType = o.propertyInfo.PropertyType,
+                        containingType = o.consumingClassType
+                    }))
                 .ToArray();
-                if (consumingClassPropertyTypes.Any()) {
-                    if (consumingClassPropertyTypes.GroupBy(t => t).Count() > 1) {
-                        throw new Exception($"Not all property types used on the property named {fieldInfo.Name} for classes named {nameOfConsumingClassToSearchFor} matched. Types found were: {string.Join(',', consumingClassPropertyTypes.Select(t => t.Name))}");
+                if (consumingClassPropertyTypeAndClassType_s.Any()) {
+                    if (consumingClassPropertyTypeAndClassType_s.GroupBy(o => o.propertyType).Count() > 1) {
+                        throw new Exception($"Not all property types used on the property named {fieldInfo.Name} for classes named {nameOfConsumingClassToSearchFor} matched. Types found were: {string.Join(',', consumingClassPropertyTypeAndClassType_s.Select(t => t.propertyType.Name))}");
                     }
-                    return consumingClassPropertyTypes[0];
+                    consumingClassType = consumingClassPropertyTypeAndClassType_s[0].containingType;
+                    return consumingClassPropertyTypeAndClassType_s[0].propertyType;
                 }
+                consumingClassType = null;
                 return null;
             };
         }

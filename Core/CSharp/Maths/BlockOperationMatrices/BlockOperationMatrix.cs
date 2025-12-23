@@ -69,56 +69,45 @@ namespace Core.Maths.BlockOperationMatrices
         public abstract InfernoTaskWithResultBase<BlockOperationMatrix> SubtractOnNewThread(
             BlockOperationMatrix other, CleanupHandler? cleanupHandler,
             InfernoFiniteResourceSemaphore? memoryAllocationSemaphore);
-        protected void UsingFileStreamAtBeginning(Action<FileStream> callback)
-        {
+        protected void UsingBlockMatrixReader(Action<BlockMatrixReader> callback) {
+
             lock (_LockObjectFileAccess)
             {
-                using (FileStream fs = new FileStream(FilePath,
-                FileMode.OpenOrCreate, FileAccess.ReadWrite,
-                FileShare.None, FILE_STREAM_BUFFER_SIZE))
+                using (var blockMatrixReader = new BlockMatrixReader(FilePath))
                 {
-                    fs.Seek(0, SeekOrigin.Begin);
-                    callback(fs);
-                    fs.Flush();
+                    callback(blockMatrixReader);
                 }
             }
         }
-        protected void UsingBinaryReader(Action<BinaryReader> callback) {
-                UsingFileStreamAtBeginning(fs =>
-                {
-                    using (var binaryReader = new BinaryReader(fs, System.Text.Encoding.Default, leaveOpen: true))
-                    {
-                        callback(binaryReader);
-                    }
-                });
-        }
-        public static void UsingBinaryReaders(BlockOperationMatrix a, BlockOperationMatrix b, Action<BinaryReader, BinaryReader> callback)
+        public static void UsingBlockMatrixReaders(BlockOperationMatrix a, BlockOperationMatrix b,
+            Action<BlockMatrixReader, BlockMatrixReader> callback)
         {
             if (a._NMatrix < b._NMatrix)
             {
-                a.UsingBinaryReader(brA => {
-                    b.UsingBinaryReader(brB =>
+                a.UsingBlockMatrixReader(brA => {
+                    b.UsingBlockMatrixReader(brB =>
                     {
                         callback(brA, brB);
                     });
                 });
                 return;
             }
-            b.UsingBinaryReader(brB => {
-                a.UsingBinaryReader(brA =>
+            b.UsingBlockMatrixReader(brB => {
+                a.UsingBlockMatrixReader(brA =>
                 {
                     callback(brA, brB);
                 });
             });
         }
-        protected void UsingBinaryWriter(Action<BinaryWriter> callback) {
-                UsingFileStreamAtBeginning(fs =>
+        protected void UsingBlockMatrixWriter(Action<BlockMatrixWriter> callback) {
+
+            lock (_LockObjectFileAccess)
+            {
+                using (var blockMatrixWriter = new BlockMatrixWriter(FilePath))
                 {
-                    using (var binaryWriter = new BinaryWriter(fs, System.Text.Encoding.Default, leaveOpen: true))
-                    {
-                        callback(binaryWriter);
-                    }
-                });
+                    callback(blockMatrixWriter);
+                }
+            }
         }
         public abstract double[][] ReadIntoMemory();
         public abstract void ReadIntoMemory(double[][] result, int offsetTop, int offsetLeft);

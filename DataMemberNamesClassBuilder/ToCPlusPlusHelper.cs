@@ -6,6 +6,7 @@ using MessageTypes.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,26 +16,23 @@ namespace DataMemberNamesClassBuilder
     {
         private const string SUCCESS_VARIABLE_NAME = "s";
         public static void ToCPlusPlusClassStrings(Func<Type, DataMemberNamesClass> getDataMemberNamesClass,
-            out string hpp, out string cpp, string className, 
+            out string hpp, out string cpp, string className,
             DataMemberFieldNameValueAttributes[] dataMemberPropertyNameValuePairs,
-            bool isRequest, bool isResponse, bool isMessage, MessageTypeAttribute messageTypeAttribute)
+            bool isRequest, bool isResponse, bool isMessage, MessageTypeAttribute messageTypeAttribute,
+            bool cleanupBucketApproach = true,
+            ReservedKey[]? reservedKeys = null)
         {
+            if (!cleanupBucketApproach) 
+                throw new NotImplementedException($"Not fully implemented yet for {nameof(cleanupBucketApproach)} = true yet...");
             string classNameLower = className.ToLower();
             StringBuilder sbHpp = new StringBuilder();
             StringBuilder sbCpp = new StringBuilder();
-            List<string> seenImports = new List<string> { className };
-            StringBuilder sbImports = new StringBuilder();
-            sbImports.AppendLine("#include \"../../cJSON/cJSON.h\"");
-            sbImports.AppendLine("#include \"../../JSON/JHelper.hpp\"");
-            sbImports.AppendLine("#include <memory>");
-            Action<DataMemberNamesClass> addInclude = (dataMemberNamesClass) => {
-                if (seenImports.IndexOf(dataMemberNamesClass.ClassName) >= 0)
-                    return;
-                sbImports.Append("#include \"./");
-                sbImports.Append(dataMemberNamesClass.ClassName); ;
-                sbImports.AppendLine(".hpp\"");
-                seenImports.Add(dataMemberNamesClass.ClassName);
-            };
+            StringBuilder sbImportsHpp = new StringBuilder();
+            sbImportsHpp.AppendLine("#include \"../../cJSON/cJSON.h\"");
+            sbImportsHpp.AppendLine("#include \"../../JSON/JHelper.hpp\"");
+            sbImportsHpp.AppendLine("#include \"../../Core/CleanupBucket.hpp\"");
+            sbImportsHpp.AppendLine("#include <memory>");
+            var addInclude = Create_AddIncludeOtherMessage(sbImportsHpp, className);
             string[] lowerCamelCasePropertyNames = dataMemberPropertyNameValuePairs
                 .Select(d => StringHelper.LowerCamelCase(d.Name)).ToArray();
             string ifndefName = className.ToUpper() + "_HPP";
@@ -45,16 +43,20 @@ namespace DataMemberNamesClassBuilder
             sbIfNDef.AppendLine(ifndefName);
             sbIfNDef.AppendLine();
             VariableNameSource<DataMemberFieldNameValueAttributes>
-                variableNameSource = new VariableNameSource<DataMemberFieldNameValueAttributes>();
+                variableNameSource =
+                new VariableNameSource<DataMemberFieldNameValueAttributes>();
 
             StringBuilder sbPrivateDataMembers = new StringBuilder();
             StringBuilder sbGetterSignatures = new StringBuilder();
             StringBuilder sbGetters = new StringBuilder();
+            StringBuilder sbSetterSignatures = new StringBuilder();
+            StringBuilder sbSetters = new StringBuilder();
             StringBuilder sbConstructorSignature = new StringBuilder();
             StringBuilder sbConstructor = new StringBuilder();
             StringBuilder sbConstructorPart2 = new StringBuilder();
             StringBuilder sbDeconstructorSignature = new StringBuilder();
             StringBuilder sbDeconstructor = new StringBuilder();
+            StringBuilder sbDeconstructorPart2 = new StringBuilder();
             StringBuilder sbToJSONSignature = new StringBuilder();
             StringBuilder sbFromJSONSignature = new StringBuilder();
             StringBuilder sbToJSON = new StringBuilder();
@@ -79,28 +81,34 @@ namespace DataMemberNamesClassBuilder
             sbDeconstructor.AppendLine("(){");
 
             sbToJSONSignature.Append("        cJSON* toJSON() noexcept;");
-            sbFromJSONSignature.Append("        static std::shared_ptr<");
-            sbFromJSONSignature.Append(className);
-            sbFromJSONSignature.Append("> fromJSON(cJSON* j) noexcept;");
-
             sbToJSON.Append("cJSON* ");
             sbToJSON.Append(className);
             sbToJSON.AppendLine("::toJSON(){");
-            sbFromJSON.Append("std::shared_ptr<");
+            if (cleanupBucketApproach)
+            {
+                sbFromJSONSignature.Append("        static ");
+                sbFromJSONSignature.Append(className);
+                sbFromJSONSignature.Append("* fromJSON(cJSON* j, CleanupBucket& cleanupBucket) noexcept;");
+
+                sbFromJSON.Append(className);
+                sbFromJSON.Append("* ");
+            }
+            else
+            {
+                sbFromJSONSignature.Append("        static std::shared_ptr<");
+                sbFromJSONSignature.Append(className);
+                sbFromJSONSignature.Append("> fromJSON(cJSON* j) noexcept;");
+                sbFromJSON.Append("std::shared_ptr<");
+                sbFromJSON.Append(className);
+                sbFromJSON.Append("> ");
+            }
+
             sbFromJSON.Append(className);
-            sbFromJSON.Append("> ");
-            sbFromJSON.Append(className);
-            sbFromJSON.AppendLine("::fromJSON(cJSON* j){");
-            sbFromJSON.Append("    bool ");
-            sbFromJSON.Append(SUCCESS_VARIABLE_NAME);
-            sbFromJSON.AppendLine(" = true;");
-            sbFromJSONSecondPart.Append("    return std::make_shared<");
-            sbFromJSONSecondPart.Append(className);
-            sbFromJSONSecondPart.Append(">");
-            sbFromJSONSecondPart.Append("(");
-            sbToJSON.AppendLine("    cJSON *j = cJSON_CreateObject();");
-            bool firstVariable = true;
-            bool hadParameter = false;
+            sbFromJSON.Append("::fromJSON(cJSON* j");
+            if (cleanupBucketApproach)
+            {
+                sbFromJSON.AppendLine(", CleanupBucket& cleanupBucket){");
+            }
             var propertyNameValuePairs = dataMemberPropertyNameValuePairs
             .OrderBy(a => a.Name == "ticket" ? 1 : 0) // "ticket" last
             .ThenBy(a => a.Name)                      // everything else alphabetical
@@ -108,14 +116,43 @@ namespace DataMemberNamesClassBuilder
 
             if (isResponse || isRequest)
             {
-                propertyNameValuePairs.Add(new DataMemberFieldNameValueAttributes("ticket", Ticketing.TICKET, new Attribute[0], null, typeof(ulong)));
+                propertyNameValuePairs.Add(
+                    new DataMemberFieldNameValueAttributes(
+                    "ticket", Ticketing.TICKET, new Attribute[0], null,
+                    typeof(ulong), null));
             }
+            if (propertyNameValuePairs.Any())
+            {
+                sbFromJSON.Append("    bool ");
+                sbFromJSON.Append(SUCCESS_VARIABLE_NAME);
+                sbFromJSON.AppendLine(" = true;");
+            }
+            if (cleanupBucketApproach)
+            {
+
+                sbFromJSONSecondPart.Append("    auto r = new ");
+                sbFromJSONSecondPart.Append(className);
+            }
+            else
+            {
+                sbFromJSONSecondPart.Append("    auto r = std::make_shared<");
+                sbFromJSONSecondPart.Append(className);
+                sbFromJSONSecondPart.Append(">");
+            }
+            sbFromJSONSecondPart.Append("(");
+            sbToJSON.AppendLine("    cJSON *j = cJSON_CreateObject();");
+            bool firstVariable = true;
+            bool hadParameter = false;
+            var checkNotReservedKey = Create_CheckNotReservedKey(reservedKeys);
             var addMemberInitializer = Create_AddMemberInitializer(sbConstructorPart2);
             var addGetterMethod = Create_AddGetterMethod(className, sbGetterSignatures, sbGetters);
+            var addSetterMethod = Create_AddSetterMethod(className, sbSetterSignatures, sbSetters);
             var addGetterMethodArray = Create_AddGetterMethodArray(className, sbGetterSignatures, sbGetters);
-            var addDeconstructorDeleteArray = Create_AddDeconstructorDeleteArray(sbDeconstructor);
+            var addDeconstructorDeleteArray = Create_AddDeconstructorDeleteArray(
+                sbDeconstructorPart2, out Func<bool> getHasVariablesToDeconstruct);
             var toCPlusPlusClassStrings_DataMember_NonClass = Create_DataMember_NonClass(
-                sbPrivateDataMembers,
+                cleanupBucketApproach,
+                sbPrivateDataMembers, 
                 sbConstructor,
                 sbConstructorSignature,
                 sbFromJSON,
@@ -123,10 +160,12 @@ namespace DataMemberNamesClassBuilder
                 sbFromJSONSecondPart,
                 addMemberInitializer,
                 addGetterMethod,
+                addSetterMethod,
                 addGetterMethodArray,
                 addDeconstructorDeleteArray
             );
             var toCPlusPlusClassStrings_DataMember_Class = Create_ToCPlusPlusClassStrings_DataMember_Class(
+                cleanupBucketApproach,
                 className,
                 sbPrivateDataMembers,
                 sbConstructor,
@@ -139,8 +178,11 @@ namespace DataMemberNamesClassBuilder
                 addGetterMethod,
                 addDeconstructorDeleteArray
             );
-            foreach (DataMemberFieldNameValueAttributes dataMemberPropertyNameValuePair in propertyNameValuePairs)
+            
+            foreach (DataMemberFieldNameValueAttributes dataMemberPropertyNameValuePair
+                in propertyNameValuePairs)
             {
+                checkNotReservedKey(dataMemberPropertyNameValuePair.Value, dataMemberPropertyNameValuePair.ConsumingType);
                 if (dataMemberPropertyNameValuePair.TypeFromActualUse == null) continue;
                 if (dataMemberPropertyNameValuePair.DataMemberNamesIgnoreAttribute != null)
                 {
@@ -157,10 +199,14 @@ namespace DataMemberNamesClassBuilder
                 DataMemberNamesIgnoreAttribute dataMemberNamesIgnoreAttribute =
                     dataMemberPropertyNameValuePair.DataMemberNamesIgnoreAttribute;
                 bool isArray = dataMemberPropertyNameValuePair.TypeFromActualUse.IsArray;
-                CPlusPlusType cPlusPlusType = CPlusPlusHelper.TranslateTypeForCPlusPlus(
+                CPlusPlusType cPlusPlusType = CPlusPlusHelper
+                    .TranslateTypeForCPlusPlus(
                 !isArray
                 ? dataMemberPropertyNameValuePair.TypeFromActualUse
-                : GetArrayEntryType(dataMemberPropertyNameValuePair.TypeFromActualUse));
+                : GetArrayEntryType(dataMemberPropertyNameValuePair.TypeFromActualUse),
+                dataMemberPropertyNameValuePair.Attributes,
+                dataMemberPropertyNameValuePair.ConsumingType,
+                dataMemberPropertyNameValuePair.Name);
 
                 DataMemberNamesClassAttribute dataMemberNamesClassAttribute = dataMemberPropertyNameValuePair.DataMemberNamesClassAttribute;
                 if (dataMemberNamesClassAttribute == null && cPlusPlusType.IsClass())
@@ -214,7 +260,9 @@ namespace DataMemberNamesClassBuilder
                          isArray,
                          key,
                          variableName,
-                         underscoredVariableName
+                         underscoredVariableName,
+                        dataMemberPropertyNameValuePair.ConsumingType,
+                        dataMemberPropertyNameValuePair.Name
                     );
                 }
                 if (isRequest && (dataMemberPropertyNameValuePair.Value == Ticketing.TICKET))
@@ -222,13 +270,28 @@ namespace DataMemberNamesClassBuilder
                     sbConstructorSignature.Append(" = 0");
                 }
             }
+            if (getHasVariablesToDeconstruct())
+            {
+                if (!firstVariable)
+                {
+                   // sbConstructorSignature.AppendLine(",");
+                    //sbConstructor.AppendLine(",");
+                    //sbFromJSONSecondPart.Append(", true");
+                }
+                //sbConstructorSignature.Append("           bool freeMemoryInDeconstructor");
 
+                //sbConstructor.Append("    bool freeMemoryInDeconstructor");
+                addMemberInitializer("_freeMemoryInDeconstructor", "false");
+                sbPrivateDataMembers.AppendLine("        bool _freeMemoryInDeconstructor;");
+
+                sbDeconstructor.AppendLine(     "if(!_freeMemoryInDeconstructor)return;");
+            }
             sbConstructorSignature.AppendLine(") noexcept;");
             sbConstructor.Append(")");
             if (hadParameter)
             {
                 sbConstructor.Append(":");
-                sbImports.AppendLine("#include \"../../JSON/JHelper.hpp\"");
+                sbImportsHpp.AppendLine("#include \"../../JSON/JHelper.hpp\"");
             }
             sbConstructor.AppendLine();
             sbConstructorPart2.AppendLine("{");
@@ -237,11 +300,23 @@ namespace DataMemberNamesClassBuilder
             sbToJSON.AppendLine("    return j;");
             sbToJSON.AppendLine("}");
             sbFromJSONSecondPart.AppendLine(");");
+            if (cleanupBucketApproach)
+            {
+                sbFromJSONSecondPart.AppendLine("    cleanupBucket.addDelete(r);");
+            }
+            else
+            {
+                if (getHasVariablesToDeconstruct())
+                {
+                    sbFromJSONSecondPart.AppendLine("   r->_freeMemoryInDeconstructor = true;");
+                }
+            }
+            sbFromJSONSecondPart.AppendLine("    return r;");
+            sbFromJSONSecondPart.AppendLine("}");
             sbFromJSON.Append(sbFromJSONSecondPart);
-            sbFromJSON.AppendLine("}");
-            sbDeconstructor.AppendLine("}");
+            sbDeconstructorPart2.AppendLine("}");
             sbHpp.Append(sbIfNDef);
-            sbHpp.Append(sbImports);
+            sbHpp.Append(sbImportsHpp);
             sbHpp.Append("class ");
             sbHpp.AppendLine(className);
             sbHpp.AppendLine("{");
@@ -256,6 +331,7 @@ namespace DataMemberNamesClassBuilder
             }
             sbHpp.Append(sbPrivateDataMembers);
             sbHpp.Append(sbGetterSignatures);
+            sbHpp.Append(sbSetterSignatures);
             sbHpp.Append(sbConstructorSignature);
             sbHpp.Append(sbDeconstructorSignature);
             if (isResponse || isMessage)
@@ -289,6 +365,7 @@ namespace DataMemberNamesClassBuilder
             sbCpp.Append(sbConstructor);
             sbCpp.Append(sbConstructorPart2);
             sbCpp.Append(sbGetters);
+            sbCpp.Append(sbSetters);
             if (className.Contains("Request") || className.Contains("request"))
             {
 
@@ -302,18 +379,60 @@ namespace DataMemberNamesClassBuilder
             sbCpp.Append(sbToJSON);
             sbCpp.Append(sbFromJSON);
             sbCpp.Append(sbDeconstructor);
+            sbCpp.Append(sbDeconstructorPart2);
 
             hpp = sbHpp.ToString();
             cpp = sbCpp.ToString();
         }
-        private static DelegateAddDeconstructorDeleteArray Create_AddDeconstructorDeleteArray(StringBuilder sbDeconstructor) {
+        private static Action<string, Type?> Create_CheckNotReservedKey(ReservedKey[]? reservedKeys) {
+            if (reservedKeys == null)
+                return (key, actualType) => { };
+            var mapKeyTo = new Dictionary<string, ReservedKey>();
+            foreach (var reservedKey in reservedKeys) {
+                if (mapKeyTo.ContainsKey(reservedKey.Value)) {
+                    throw new ArgumentException("Provided the reserve key \"{reservedKey.Value}\" multiple times!");
+                }
+                mapKeyTo[reservedKey.Value] = reservedKey;
+            }
+            return (key, actualType) => {
+                if (!mapKeyTo.TryGetValue(key, out ReservedKey reservedKey))
+                {
+                    return;
+                }
+                if (actualType!=null&&reservedKey.IsAllowedClass(actualType))
+                {
+                    return;
+                }
+                throw new Exception($"Key \"{key}\" is reserved ");
+            };
+        }
+        private static Action<string> Create_AddIncludeOtherMessage(
+            StringBuilder sbImportsHpp, string className)
+        {
+            List<string> seenImports = new List<string> { className };
+            return (path) => {
+                if (seenImports.IndexOf(path) >= 0)
+                    return;
+                sbImportsHpp.Append("#include \"");
+                sbImportsHpp.Append(path); ;
+                sbImportsHpp.AppendLine("\"");
+                seenImports.Add(path);
+            };
+        }
+        private static DelegateAddDeconstructorDeleteArray 
+            Create_AddDeconstructorDeleteArray(
+            StringBuilder sbDeconstructorPart2,
+            out Func<bool> getHasVariablesToDeconstruct) {
+            bool hasVariablesToDeconstruct = false;
+            getHasVariablesToDeconstruct = () => hasVariablesToDeconstruct;
             return (string underscoredVariableName) => {
-                sbDeconstructor.Append("     if(");
-                sbDeconstructor.Append(underscoredVariableName);
-                sbDeconstructor.Append("!=nullptr)");
-                sbDeconstructor.Append("delete[] ");
-                sbDeconstructor.Append(underscoredVariableName);
-                sbDeconstructor.AppendLine(";");
+                sbDeconstructorPart2.Append("     if(");
+                sbDeconstructorPart2.Append(underscoredVariableName);
+                sbDeconstructorPart2.Append("!=nullptr)");
+                sbDeconstructorPart2.Append("delete[] ");
+                sbDeconstructorPart2.Append(underscoredVariableName);
+                sbDeconstructorPart2.AppendLine(";");
+                hasVariablesToDeconstruct = true;
             };
         }
         private static Action<string, string> Create_AddMemberInitializer(
@@ -345,18 +464,46 @@ namespace DataMemberNamesClassBuilder
                 sbGetterSignatures.Append(typeString);
                 sbGetterSignatures.Append(" ");
                 sbGetterSignatures.Append(getMethodName);
-                sbGetterSignatures.AppendLine("() noexcept;");
+                sbGetterSignatures.AppendLine("()const noexcept;");
                 sbGetters.Append(typeString);
                 sbGetters.Append(" ");
                 sbGetters.Append(className);
                 sbGetters.Append("::");
                 sbGetters.Append(getMethodName);
-                sbGetters.AppendLine("(){");
+                sbGetters.AppendLine("()const noexcept{");
                 sbGetters.Append("    return this->");
                 sbGetters.Append(underscoredVariableName
                     );
                 sbGetters.AppendLine(";");
                 sbGetters.AppendLine("}");
+            };
+        }
+        private static DelegateAddSetterMethod Create_AddSetterMethod(
+            string className,
+            StringBuilder sbSetterSignatures,
+            StringBuilder sbSetters
+        )
+        {
+            return (string typeString, string variableName, string underscoredVariableName) =>
+            {
+                string setMethodName = "set" + StringHelper.UpperCamelCase(variableName);
+                sbSetterSignatures.Append("        void ");
+                sbSetterSignatures.Append(setMethodName);
+                sbSetterSignatures.Append("(");
+                sbSetterSignatures.Append(typeString);
+                sbSetterSignatures.Append(" value");
+                sbSetterSignatures.AppendLine(") noexcept;");
+                sbSetters.Append("void ");
+                sbSetters.Append(className);
+                sbSetters.Append("::");
+                sbSetters.Append(setMethodName);
+                sbSetters.Append("(");
+                sbSetters.Append(typeString);
+                sbSetters.AppendLine(" value) noexcept{");
+                sbSetters.Append("    this->");
+                sbSetters.Append(underscoredVariableName);
+                sbSetters.AppendLine(" = value;");
+                sbSetters.AppendLine("}");
             };
         }
         private static DelegateAddGetterMethodArray
@@ -393,6 +540,7 @@ namespace DataMemberNamesClassBuilder
         }
         private static DelegateDataMember_Class
             Create_ToCPlusPlusClassStrings_DataMember_Class(
+            bool cleanupBucketApproach,
             string className,
             StringBuilder sbPrivateDataMembers,
             StringBuilder sbConstructor,
@@ -400,7 +548,7 @@ namespace DataMemberNamesClassBuilder
             StringBuilder sbFromJSON,
             StringBuilder sbToJSON,
             Func<Type, DataMemberNamesClass> getDataMemberNamesClass,
-            Action<DataMemberNamesClass> addInclude,
+            Action<string> addInclude,
             Action<string, string> addMemberInitializer,
             DelegateAddGetterMethod addGetterMethod,
             DelegateAddDeconstructorDeleteArray addDeconstructorDeleteArray
@@ -421,7 +569,6 @@ namespace DataMemberNamesClassBuilder
                 {
                     return;
                 }
-                throw new NotImplementedException("Deconstructor not implemented");
                 if (dataMemberNamesClassAttribute == null)
                 {
                     throw new Exception($"There was no {nameof(DataMemberNamesClassAttribute)} for property {propertyClassName} for type {propertyClassTypeName} in class {className}");
@@ -434,18 +581,30 @@ namespace DataMemberNamesClassBuilder
                 {
                     throw new Exception($"Could not retrieve {nameof(DataMemberNamesClass)} for property {key} in class {className}");
                 }
-                string fullTypeString = dataMemberNamesClassChild.ClassName + "*";
-                addInclude(dataMemberNamesClassChild);
+                string fullTypeString;
+                if (cleanupBucketApproach)
+                {
+                    fullTypeString = $"{propertyClassName}*";
+                }
+                else
+                {
+                    fullTypeString = $"std::shared_ptr<{propertyClassName}>";
+                }
+                addInclude($"{dataMemberNamesClassChild.ClassName}.hpp");
                 sbPrivateDataMembers.Append(fullTypeString);
                 sbConstructorSignature.Append(fullTypeString);
+                sbConstructorSignature.Append(" ");
+                sbConstructorSignature.Append(variableName);
                 sbConstructor.Append(fullTypeString);
+                sbConstructor.Append(" ");
+                sbConstructor.Append(variableName);
                 string jsonVariableName = variableName + "JSON";
                 sbFromJSON.Append("    cJSON* ");
                 sbFromJSON.Append(jsonVariableName);
                 sbFromJSON.Append(" = ");
                 sbFromJSON.Append(GetJHelperFromJSONMethod(cPlusPlusType,
                         key));
-                sbFromJSON.Append(";");
+                sbFromJSON.AppendLine(";");
 
 
                 sbFromJSON.Append("    ");
@@ -469,20 +628,30 @@ namespace DataMemberNamesClassBuilder
                 switch (cPlusPlusType)
                 {
                     case CPlusPlusType.Class:
-                        sbFromJSON.Append(className);
+                        sbFromJSON.Append(propertyClassName);
                         sbFromJSON.Append("::fromJSON(");
                         sbFromJSON.Append(jsonVariableName);
+                        if (cleanupBucketApproach) {
+                            sbFromJSON.Append(", cleanupBucket");
+                        }
                         sbFromJSON.Append(")");
+                        addInclude("../../System/Aborter.hpp");
+                        sbToJSON.AppendLine($"if(this->{underscoredVariableName}==nullptr) Aborter::safeAbort(\"{className}\",\"{underscoredVariableName} cannot be null\");");
                         sbToJSON.AppendLine($"    JHelper::addObject(j, \"{key}\", this->{underscoredVariableName}->toJSON());");
                         break;
                     case CPlusPlusType.NullableClass:
                         sbFromJSON.Append(jsonVariableName);
                         sbFromJSON.Append("==nullptr?nullptr:");
-                        sbFromJSON.Append(className);
+                        sbFromJSON.Append(propertyClassName);
                         sbFromJSON.Append("::fromJSON(");
                         sbFromJSON.Append(jsonVariableName);
+                        if (cleanupBucketApproach)
+                        {
+                            sbFromJSON.Append(", cleanupBucket");
+                        }
                         sbFromJSON.Append(")");
-                        sbToJSON.AppendLine($"    JHelper::addNullableObject(j, \"{key}\", this->{underscoredVariableName}->toJSON());");
+                        addInclude("../../System/Aborter.hpp");
+                        sbToJSON.AppendLine($"    JHelper::addNullableObject(j, \"{key}\", this->{underscoredVariableName}==nullptr?nullptr:this->{underscoredVariableName}->toJSON());");
                         break;
                     default:
                         throw new Exception("Not supported");
@@ -493,6 +662,7 @@ namespace DataMemberNamesClassBuilder
         }
         private static DelegateDataMember_NonClass
             Create_DataMember_NonClass(
+            bool cleanupBucketApproach,
             StringBuilder sbPrivateDataMembers,
             StringBuilder sbConstructor,
             StringBuilder sbConstructorSignature,
@@ -501,6 +671,7 @@ namespace DataMemberNamesClassBuilder
             StringBuilder sbFromJSONSecondPart,
             Action<string, string> addMemberInitializer,
             DelegateAddGetterMethod addGetterMethod,
+            DelegateAddSetterMethod addSetterMethod,
             DelegateAddGetterMethodArray addGetterMethodArray,
             DelegateAddDeconstructorDeleteArray addDeconstructorDeleteArray
             )
@@ -510,7 +681,9 @@ namespace DataMemberNamesClassBuilder
             bool isArray,
             string key,
             string variableName,
-            string underscoredVariableName) =>
+            string underscoredVariableName,
+            Type classType,
+            string propertyNameOnClass) =>
             {
                 string typeString = cPlusPlusType.GetString();
                 sbPrivateDataMembers.Append(typeString);
@@ -526,6 +699,13 @@ namespace DataMemberNamesClassBuilder
                 {
                     addGetterMethod(typeString, variableName,
                         underscoredVariableName);
+                    if (classType != null)
+                    {
+                        if (HasPublicSetter(classType, propertyNameOnClass))
+                        {
+                            addSetterMethod(typeString, variableName, underscoredVariableName);
+                        }
+                    }
                 }
                 sbConstructor.Append(typeString);
                 sbConstructorSignature.Append(typeString);
@@ -533,7 +713,6 @@ namespace DataMemberNamesClassBuilder
                 {
                     sbConstructor.Append("*");
                     sbConstructorSignature.Append("*");
-                    addDeconstructorDeleteArray(underscoredVariableName);
                 }
                 sbConstructor.Append(' ');
                 sbConstructor.Append(variableName);
@@ -608,9 +787,35 @@ namespace DataMemberNamesClassBuilder
                 addMemberInitializer(underscoredVariableName, variableName);
                 if (isArray)
                 {
+                    if (cleanupBucketApproach)
+                    {
+                        sbFromJSON.Append("    cleanupBucket.addDeleteArray(");
+                        sbFromJSON.Append(variableName);
+                        sbFromJSON.AppendLine(");");
+                    }
+                    else {
+                        addDeconstructorDeleteArray(underscoredVariableName);
+                    }
                     sbFromJSONSecondPart.Append(", ");
                     sbFromJSONSecondPart.Append(lengthVariableName);
                     addMemberInitializer(underscoredLengthVariableName, lengthVariableName);
+                }
+                else
+                {
+                    if (cPlusPlusType.Equals(CPlusPlusType.CharPointer))
+                    {
+                        if (cleanupBucketApproach)
+                        {
+                            sbFromJSON.Append("    cleanupBucket.addDeleteArray(");
+                            sbFromJSON.Append(variableName);
+                            sbFromJSON.AppendLine(");");
+                        }
+                        else
+                        {
+
+                            addDeconstructorDeleteArray(underscoredVariableName);
+                        }
+                    }
                 }
             };
         }
@@ -642,9 +847,10 @@ namespace DataMemberNamesClassBuilder
                 CPlusPlusType.UInt32 => $"JHelper::addUInt32(j, \"{key}\", this->{underscoredVariableName})",
                 CPlusPlusType.Int64 => $"JHelper::addInt64(j, \"{key}\", this->{underscoredVariableName})",
                 CPlusPlusType.UInt64 => $"JHelper::addUInt64(j, \"{key}\", this->{underscoredVariableName})",
+                CPlusPlusType.Float=> $"JHelper::addFloat(j, \"{key}\", this->{underscoredVariableName})",
                 CPlusPlusType.Double => $"JHelper::addDouble(j, \"{key}\", this->{underscoredVariableName})",
                 CPlusPlusType.Bool => $"JHelper::addBool(j, \"{key}\", this->{underscoredVariableName})",
-                CPlusPlusType.NullableCharPointer => $"JHelper::addNullableString(j, \"{key}\", this->{underscoredVariableName})",
+                //CPlusPlusType.NullableCharPointer => $"JHelper::addNullableString(j, \"{key}\", this->{underscoredVariableName})",
                 CPlusPlusType.NullableInt8 => $"JHelper::addNullableInt8(j, \"{key}\", this->{underscoredVariableName})",
                 CPlusPlusType.NullableUInt8 => $"JHelper::addNullableUInt8(j, \"{key}\", this->{underscoredVariableName})",
                 CPlusPlusType.NullableInt16 => $"JHelper::addNullableInt16(j, \"{key}\", this->{underscoredVariableName})",
@@ -653,6 +859,7 @@ namespace DataMemberNamesClassBuilder
                 CPlusPlusType.NullableUInt32 => $"JHelper::addNullableUInt32(j, \"{key}\", this->{underscoredVariableName})",
                 CPlusPlusType.NullableInt64 => $"JHelper::addNullableInt64(j, \"{key}\", this->{underscoredVariableName})",
                 CPlusPlusType.NullableUInt64 => $"JHelper::addNullableUInt64(j, \"{key}\", this->{underscoredVariableName})",
+                CPlusPlusType.NullableFloat => $"JHelper::addNullableFloat(j, \"{key}\", this->{underscoredVariableName})",
                 CPlusPlusType.NullableDouble => $"JHelper::addNullableDouble(j, \"{key}\", this->{underscoredVariableName})",
                 CPlusPlusType.NullableBool => $"JHelper::addNullableBool(j, \"{key}\", this->{underscoredVariableName})",
                 CPlusPlusType.Unknown => throw new Exception("Cannot pass unknown")
@@ -683,9 +890,10 @@ namespace DataMemberNamesClassBuilder
                 CPlusPlusType.UInt32 => $"JHelper::getUInt32(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
                 CPlusPlusType.Int64 => $"JHelper::getInt64(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
                 CPlusPlusType.UInt64 => $"JHelper::getUInt64(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
+                CPlusPlusType.Float => $"JHelper::getFloat(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
                 CPlusPlusType.Double => $"JHelper::getDouble(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
                 CPlusPlusType.Bool => $"JHelper::getBool(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
-                CPlusPlusType.NullableCharPointer => $"JHelper::getNullableString(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
+                //CPlusPlusType.NullableCharPointer => $"JHelper::getNullableString(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
                 CPlusPlusType.NullableInt8 => $"JHelper::getNullableInt8(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
                 CPlusPlusType.NullableUInt8 => $"JHelper::getNullableUInt8(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
                 CPlusPlusType.NullableInt16 => $"JHelper::getNullableInt16(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
@@ -694,6 +902,7 @@ namespace DataMemberNamesClassBuilder
                 CPlusPlusType.NullableUInt32 => $"JHelper::getNullableUInt32(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
                 CPlusPlusType.NullableInt64 => $"JHelper::getNullableInt64(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
                 CPlusPlusType.NullableUInt64 => $"JHelper::getNullableUInt64(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
+                CPlusPlusType.NullableFloat=> $"JHelper::getNullableFloat(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
                 CPlusPlusType.NullableDouble => $"JHelper::getNullableDouble(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
                 CPlusPlusType.NullableBool => $"JHelper::getNullableBool(j, \"{key}\", {SUCCESS_VARIABLE_NAME})",
                 CPlusPlusType.Unknown => throw new Exception("Cannot pass unknown")
@@ -748,6 +957,11 @@ namespace DataMemberNamesClassBuilder
                 }
             }
             throw new Exception($"Could not pass element type for array of type {type.Name}");
+        }
+        private static bool HasPublicSetter(Type classType, string propertyNameOnClass) {
+
+            var prop = classType.GetProperty(propertyNameOnClass);
+            return prop?.SetMethod != null && prop.SetMethod.IsPublic;
         }
     }
 }

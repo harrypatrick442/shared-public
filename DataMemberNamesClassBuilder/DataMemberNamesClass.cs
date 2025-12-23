@@ -43,11 +43,13 @@ namespace DataMemberNamesClassBuilder
             _MessageTypeAttribute = messageTypeAttribute;
         }
         public void ToCPlusPlusClassStrings(Func<Type, DataMemberNamesClass> getDataMemberNamesClass,
-            out string hpp, out string cpp)
+            out string hpp, out string cpp, ReservedKey[]? reservedKeys)
         {
 
-            ToCPlusPlusHelper.ToCPlusPlusClassStrings(getDataMemberNamesClass, out hpp, out cpp, ClassName, _DataMemberPropertyNameValuePairs,
-                IsRequest, IsResponse, IsMessage, _MessageTypeAttribute);
+            ToCPlusPlusHelper.ToCPlusPlusClassStrings(getDataMemberNamesClass, 
+                out hpp, out cpp, ClassName, _DataMemberPropertyNameValuePairs,
+                IsRequest, IsResponse, IsMessage, _MessageTypeAttribute,
+                reservedKeys: reservedKeys);
         }
         public string ToJavascriptClassString(Func<Type, DataMemberNamesClass> getDataMemberNamesClass) {
             StringBuilder sb = new StringBuilder();

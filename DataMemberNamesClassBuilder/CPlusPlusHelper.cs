@@ -1,9 +1,16 @@
-﻿using System; 
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reflection;
 namespace DataMemberNamesClassBuilder
 {
     public static class CPlusPlusHelper
     {
-        public static CPlusPlusType TranslateTypeForCPlusPlus(Type type)
+        public static CPlusPlusType TranslateTypeForCPlusPlus(
+            Type type,
+            Attribute[] attributes,
+            Type? consumingType,
+            string? nameInConsumingType)
         {
             if (type == null) return CPlusPlusType.Unknown;
             if (type == typeof(string))
@@ -22,6 +29,8 @@ namespace DataMemberNamesClassBuilder
                 return CPlusPlusType.Int64;
             if (type == typeof(ulong))
                 return CPlusPlusType.UInt64;
+            if (type == typeof(float))
+                return CPlusPlusType.Float;
             if (type == typeof(double))
                 return CPlusPlusType.Double;
             if (type == typeof(bool))
@@ -38,13 +47,14 @@ namespace DataMemberNamesClassBuilder
                 return CPlusPlusType.UInt32;
             if (type == typeof(UInt64))
                 return CPlusPlusType.UInt64;
-            bool isNullable = type.IsGenericType 
+            bool isNullablePrimitive = type.IsGenericType 
                 && type.GetGenericTypeDefinition() == typeof(Nullable<>);
-            if (isNullable)
+            if (isNullablePrimitive)
             {
                 Type innerType = Nullable.GetUnderlyingType(type)!;
                 if (innerType == typeof(string))
-                    return CPlusPlusType.NullableCharPointer;
+                    throw new NotImplementedException();
+                    //return CPlusPlusType.NullableCharPointer;
                 if (innerType == typeof(sbyte))
                     return CPlusPlusType.NullableInt8;
                 if (innerType == typeof(byte))
@@ -57,6 +67,8 @@ namespace DataMemberNamesClassBuilder
                     return CPlusPlusType.NullableInt32;
                 if (innerType == typeof(long))
                     return CPlusPlusType.NullableInt64;
+                if (innerType == typeof(float))
+                    return CPlusPlusType.NullableFloat;
                 if (innerType == typeof(double))
                     return CPlusPlusType.NullableDouble;
                 if (innerType == typeof(bool))
@@ -93,6 +105,14 @@ namespace DataMemberNamesClassBuilder
                 if (type.Equals(typeof(object)))
                 {
                     return CPlusPlusType.Unknown;
+                }
+                if (consumingType != null && nameInConsumingType != null)
+                {
+                    var prop = consumingType.GetProperty(nameInConsumingType);
+                    if (ClassMemberIsNullableHelper.IsNullable(prop))
+                    {
+                        return CPlusPlusType.NullableClass;
+                    }
                 }
                 return CPlusPlusType.Class;
             }

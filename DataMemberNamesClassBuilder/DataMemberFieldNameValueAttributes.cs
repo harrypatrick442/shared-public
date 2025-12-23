@@ -1,6 +1,8 @@
 ﻿using MessageTypes.Attributes;
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 
 namespace DataMemberNamesClassBuilder
 {
@@ -11,6 +13,7 @@ namespace DataMemberNamesClassBuilder
         public Attribute[] Attributes { get; }
         public Type ForType { get; }
         public Type? TypeFromActualUse { get; }
+        public Type ConsumingType { get; }
         public DataMemberNamesClassAttribute DataMemberNamesClassAttribute
         {
             get
@@ -31,12 +34,14 @@ namespace DataMemberNamesClassBuilder
         }
         public DataMemberFieldNameValueAttributes(
             string name, string value, Attribute[] attributes, Type forType,
-            Type? typeFromActualUse) {
+            Type? typeFromActualUse,
+            Type? consumingType) {
             Name = name;
             Value = value;
             Attributes = attributes;
             ForType = forType;
             TypeFromActualUse = typeFromActualUse;
+            ConsumingType = consumingType;
         }
     }
 }
