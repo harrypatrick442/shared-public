@@ -48,6 +48,7 @@ namespace Core.CSV
             {
                 WriteEntryToCurrentLine(entry);
             }
+            NextLine();
         }
         public void Dispose()
         {

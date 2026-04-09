@@ -4,7 +4,8 @@ namespace Native.Messaging
 {
     public class PingDisconnectDetector
     {
-        private System.Timers.Timer _TimerPing;
+        private System.Timers.Timer _TimerSendPing;
+        private System.Timers.Timer _TimerCheckReceivedPin;
         private RegistrationMessageHandler _RegistrationMessageHandler;
         private readonly string PING_MESSAGE_STRING;
         private readonly object _LockObject = new object();
@@ -13,13 +14,17 @@ namespace Native.Messaging
         public PingDisconnectDetector(
             RegistrationMessageHandler registrationMessageHandler,
             Action disconnected,
-            int intervalMilliseconds = 5000) {
+            int pingTimeoutMilliseconds,
+            int sendPingIntervalMilliseconds) {
             _Disconnected = disconnected;
             PING_MESSAGE_STRING = Json.Serialize(new PingMessage());
-            _TimerPing = new System.Timers.Timer(interval: intervalMilliseconds);
-            _TimerPing.AutoReset = true;
-            _TimerPing.Elapsed += Ping;
-            _RegistrationMessageHandler= registrationMessageHandler;
+            _TimerSendPing = new System.Timers.Timer(interval: sendPingIntervalMilliseconds);
+            _TimerSendPing.AutoReset = true;
+            _TimerSendPing.Elapsed += SendPing;
+            _TimerCheckReceivedPin = new System.Timers.Timer(interval: pingTimeoutMilliseconds);
+            _TimerCheckReceivedPin.AutoReset = true;
+            _TimerCheckReceivedPin.Elapsed += CheckReceivedPing;
+            _RegistrationMessageHandler = registrationMessageHandler;
             _RegistrationMessageHandler.RegisterMethod<PingMessage>(MessageTypes.Ping, HandleIncomingPing);
         }
         private void HandleIncomingPing(PingMessage message)
@@ -40,17 +45,25 @@ namespace Native.Messaging
         {
             lock (_LockObject)
             {
-                _TimerPing.Stop();
+                _TimerCheckReceivedPin.Stop();
+                _TimerSendPing.Stop();
             }
         }
-        public void StartClean() {
+        public void StartClean()
+        {
             lock (_LockObject)
             {
                 _SeenPing = true;
-                _TimerPing.Start();
+                _TimerCheckReceivedPin.Start();
+                _TimerSendPing.Start();
+                try { _RegistrationMessageHandler.SendRaw(PING_MESSAGE_STRING); }
+                catch
+                {
+
+                }
             }
         }
-        private void Ping(object sender, System.Timers.ElapsedEventArgs e)
+        private void CheckReceivedPing(object sender, System.Timers.ElapsedEventArgs e)
         {
             lock (_LockObject)
             {
@@ -62,6 +75,9 @@ namespace Native.Messaging
                 }
                 _SeenPing = false;
             }
+        }
+        private void SendPing(object sender, System.Timers.ElapsedEventArgs e)
+        {
             try { _RegistrationMessageHandler.SendRaw(PING_MESSAGE_STRING); }
             catch
             {

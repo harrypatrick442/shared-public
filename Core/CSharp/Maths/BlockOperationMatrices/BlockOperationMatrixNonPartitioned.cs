@@ -101,11 +101,11 @@ namespace Core.Maths.BlockOperationMatrices
 
             UsingBlockMatrixWriter(bmw =>
             {
-
                 // Loop over rows and write column-major data row by row
+
+                double[] buffer = new double[NColumns]; 
                 for (int row = 0; row < NRows; row++)
                 {
-                    double[] buffer = new double[NColumns];
                     for (int col = 0; col < NColumns; col++)
                     {
                         // Column-major indexing: col * NRows + row
@@ -642,7 +642,6 @@ namespace Core.Maths.BlockOperationMatrices
                 double[][] result = new double[NRows][];
                 UsingBlockMatrixReader(bmr =>
                 {
-                    double[] buffer = new double[NColumns]; // Buffer to hold a row (NColumns * 8 bytes)
                     for (int row = 0; row < NRows; row++)
                     {
                         double[] values = bmr.Read(NColumns);
@@ -671,11 +670,13 @@ namespace Core.Maths.BlockOperationMatrices
             }
             UsingBlockMatrixReader((br =>
             {
+                double[] doubles = new double[NColumns];
                 for (int i = 0; i < NRows; i++)
                 {
+                    br.Read(doubles, NColumns);
                     for (int j = 0; j < NColumns; j++)
                     {
-                        result[i + offsetTop][j + offsetLeft] = br.ReadDouble();
+                        result[i + offsetTop][j + offsetLeft] = doubles[j];
                     }
                 }
             }));
@@ -714,11 +715,12 @@ namespace Core.Maths.BlockOperationMatrices
 
         UsingBlockMatrixReader(bmr =>
         {
+            double[] values = new double[NColumns];
             // Loop over rows and columns, and populate the result in column-major order
             for (int row = 0; row < NRows; row++)
             {
                 // Read a full row (as bytes) into the buffer
-                double[] values = bmr.Read(NColumns);
+                bmr.Read(values, NColumns);
                 if (values.Length != NColumns)
                 {
                     throw new EndOfStreamException("Unexpected end of file while reading double values.");

@@ -1,4 +1,5 @@
-﻿using InTheHand.Net.Sockets;
+﻿using InfernoDispatcher;
+using InTheHand.Net.Sockets;
 using Native.Messaging;
 using System.Text;
 
@@ -20,7 +21,6 @@ namespace Bluetooth
             _RegistrationMessageHandler = registrationMessageHandler;
             _RegistrationMessageHandler.SetSendRaw(SendRaw);
             StartReading(_Stream);
-            Console.WriteLine("Connection closed.");
         }
         private void SendRaw(string message) {
             _StreamWriter.Write(message);
@@ -47,9 +47,7 @@ namespace Bluetooth
                 }
                 if (line != null)
                 {
-                    Console.WriteLine("Received: " + line);
-                    _RegistrationMessageHandler.HandleIncomingMessage(line);
-
+                    Handle(line);
                 }
                 else
                 {
@@ -63,7 +61,21 @@ namespace Bluetooth
                 }
             }
         }
-    public string Read() {
+        private void Handle(string line) {
+            Dispatcher.Instance.Run(() =>
+            {
+                try
+                {
+                    Console.WriteLine("Received: " + line);
+                    _RegistrationMessageHandler.HandleIncomingMessage(line);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            });
+        }
+        public string Read() {
             throw new NotImplementedException();
         }
         ~ConnectedBluetoothDeviceHandle()

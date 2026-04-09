@@ -22,8 +22,17 @@ namespace Core.Maths.BlockOperationMatrices
             _NInstancesOfCurrent = 0;
             _NReadsOfCurrent = 0;
         }
+        public void Read(double[] values, int count)
+        {
+            CheckNotDisposed();
+            for (int i = 0; i < count; i++)
+            {
+                values[i] = ReadDouble();
+            }
+        }
         public double[] Read(int count)
         {
+            CheckNotDisposed();
             double[] values = new double[count];
             for(int i = 0; i < count; i++)
             {
@@ -32,7 +41,8 @@ namespace Core.Maths.BlockOperationMatrices
             return values;
         }
         public double ReadDouble() {
-            if(_NReadsOfCurrent>=_NInstancesOfCurrent)
+            CheckNotDisposed();
+            if (_NReadsOfCurrent>=_NInstancesOfCurrent)
             {
                 ReadNext();
                 _NReadsOfCurrent = 1;

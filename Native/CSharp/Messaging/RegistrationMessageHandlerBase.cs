@@ -47,9 +47,8 @@ namespace Native.Messaging
         }
         protected void HandleIncomingMessage(string rawMessage)
         {
-
             TypedTicketedMessage ticketedMessageBase = Json.Instance.Deserialize<TypedTicketedMessage>(rawMessage);
-            if (ticketedMessageBase.Type == MessageTypeDataMemberName.Value)
+            if (ticketedMessageBase.Type == TicketedMessageType.Ticketed)
             {
                 _TicketedSender.HandleMessage(ticketedMessageBase, rawMessage);
                 return;

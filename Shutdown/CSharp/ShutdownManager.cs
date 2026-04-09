@@ -26,7 +26,8 @@ namespace Shutdown
         {
             _GetLog = getLog;
         }
-        public static ShutdownManager Initialize(Action<int> applicationShutdown, Func<ILog> getLog, bool throwErrorOnAlreadyInitialized=true) {
+        public static ShutdownManager Initialize(
+            Action<int> applicationShutdown, Func<ILog> getLog, bool throwErrorOnAlreadyInitialized=true) {
             _ApplicationShutdown = applicationShutdown;
             lock (_InitializeLockObject){
                 if (_Instance != null)

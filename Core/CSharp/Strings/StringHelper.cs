@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 namespace Core.Strings
 {
     public static class StringHelper
@@ -167,6 +168,34 @@ namespace Core.Strings
             while (str.Length < length)
                 str = '0' + str;
             return str;
+        }
+        public static string CamelCaseToSnakeCase(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                char c = input[i];
+
+                if (char.IsUpper(c))
+                {
+                    bool prevIsLower = i > 0 && char.IsLower(input[i - 1]);
+                    bool nextIsLower = i + 1 < input.Length && char.IsLower(input[i + 1]);
+
+                    if (sb.Length > 0 && (prevIsLower || nextIsLower))
+                        sb.Append('_');
+
+                    sb.Append(char.ToLower(c));
+                }
+                else
+                {
+                    sb.Append(c);
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }

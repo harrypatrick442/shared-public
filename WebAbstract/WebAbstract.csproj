@@ -7,7 +7,9 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\echat\Authentication\Authentication.csproj" />
+    <ProjectReference Include="..\..\echat\Logging_ClientFriendly\Logging_ClientFriendly.csproj" />
     <ProjectReference Include="..\Core\CSharp\Core.csproj" />
+    <ProjectReference Include="..\DependencyManagement\DependencyManagement.csproj" />
     <ProjectReference Include="..\Emailing\Emailing.csproj" />
     <ProjectReference Include="..\..\echat\Sessions\Sessions.csproj" />
     <ProjectReference Include="..\..\echat\UserRouting\UserRouting.csproj" />

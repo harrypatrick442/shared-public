@@ -25,7 +25,7 @@ namespace Bluetooth
                 .ToArray();
 
         }
-        public static ConnectedBluetoothDeviceHandle Connect(string bluetoothAddress,
+        public static ConnectedBluetoothDeviceHandle Connect (string bluetoothAddress,
             Func<RegistrationMessageHandler> getRegistrationMessageHandler) {
                 Guid serviceClass = BluetoothService.SerialPort;
                 var address = BluetoothAddress.Parse(bluetoothAddress);

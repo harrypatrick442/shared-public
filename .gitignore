@@ -72,3 +72,6 @@ DataMemberNamesClassBuilder/DataMemberNamesClassBuilder.csproj.user
 /ConfigurationCore/obj
 /SharedMasterSlaveUARTMessages/bin
 /SharedMasterSlaveUARTMessages/obj
+/ConfigurationClassBuilder/bin
+/ConfigurationClassBuilder/.vs
+/ConfigurationClassBuilder/obj
